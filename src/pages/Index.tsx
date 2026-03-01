@@ -7,12 +7,18 @@ import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
 import { Plus, LogOut } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Index = () => {
   const [authed, setAuthed] = useState(!!getActiveUser());
   const [tab, setTab] = useState<TabType>('home');
   const [showAdd, setShowAdd] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const triggerRefresh = useCallback(() => setRefresh(r => r + 1), []);
 
@@ -33,7 +39,7 @@ const Index = () => {
       <div className="sticky top-0 z-30 glass-strong">
         <div className="max-w-lg mx-auto flex items-center justify-between px-5 py-3">
           <h1 className="text-lg font-black text-gradient">SpendWise</h1>
-          <button onClick={handleLogout} className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all">
+          <button onClick={() => setShowLogoutConfirm(true)} className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all">
             <LogOut size={16} className="text-muted-foreground" />
           </button>
         </div>
@@ -57,6 +63,19 @@ const Index = () => {
       <BottomNav active={tab} onTabChange={setTab} />
 
       {showAdd && <AddTransactionModal onClose={() => setShowAdd(false)} onAdded={triggerRefresh} />}
+
+      <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+        <AlertDialogContent className="rounded-3xl border-white/10 bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign out?</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to sign out of SpendWise?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction className="rounded-2xl bg-destructive hover:bg-destructive/90" onClick={handleLogout}>Sign Out</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
