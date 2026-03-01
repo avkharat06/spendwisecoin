@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { getTransactions, deleteTransactions, restoreTransactions, Transaction } from '@/lib/auth';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SwipeableTransaction from './SwipeableTransaction';
 
 interface HistoryViewProps {
   refresh: number;
@@ -53,6 +54,27 @@ const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
     });
   };
 
+  const handleSingleDelete = (id: string) => {
+    const deleted = deleteTransactions([id]);
+    setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
+    onRefresh();
+    toast({
+      title: 'Transaction deleted',
+      action: (
+        <button
+          onClick={() => {
+            restoreTransactions(deleted);
+            onRefresh();
+            toast({ title: 'Transaction restored' });
+          }}
+          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all"
+        >
+          Undo
+        </button>
+      ),
+    });
+  };
+
   const grouped = useMemo(() => {
     const groups: Record<string, Transaction[]> = {};
     transactions.forEach(tx => {
@@ -93,25 +115,26 @@ const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
             {txs.map(tx => {
               const isSelected = selected.has(tx.id);
               return (
-                <div
-                  key={tx.id}
-                  onClick={() => toggle(tx.id)}
-                  className={`card-item flex items-center gap-3 cursor-pointer transition-all ${isSelected ? 'border-primary/50' : ''}`}
-                >
-                  <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
-                    {isSelected && <div className="w-2 h-2 rounded-sm bg-primary-foreground" />}
+                <SwipeableTransaction key={tx.id} onDelete={() => handleSingleDelete(tx.id)}>
+                  <div
+                    onClick={() => toggle(tx.id)}
+                    className={`card-item flex items-center gap-3 cursor-pointer transition-all ${isSelected ? 'border-primary/50' : ''}`}
+                  >
+                    <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
+                      {isSelected && <div className="w-2 h-2 rounded-sm bg-primary-foreground" />}
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg" style={{ backgroundColor: tx.categoryColor + '20' }}>
+                      {tx.categoryEmoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{tx.merchant}</p>
+                      <p className="text-xs text-muted-foreground">{tx.category}</p>
+                    </div>
+                    <p className={`text-sm font-bold ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>
+                      {tx.type === 'income' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
+                    </p>
                   </div>
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg" style={{ backgroundColor: tx.categoryColor + '20' }}>
-                    {tx.categoryEmoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{tx.merchant}</p>
-                    <p className="text-xs text-muted-foreground">{tx.category}</p>
-                  </div>
-                  <p className={`text-sm font-bold ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>
-                    {tx.type === 'income' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
-                  </p>
-                </div>
+                </SwipeableTransaction>
               );
             })}
           </div>
