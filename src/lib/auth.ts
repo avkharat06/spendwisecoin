@@ -93,10 +93,20 @@ export function addTransaction(tx: Omit<Transaction, 'id' | 'timestamp'>): Trans
   return newTx;
 }
 
-export function deleteTransactions(ids: string[]) {
+export function deleteTransactions(ids: string[]): Transaction[] {
   const email = localStorage.getItem(ACTIVE_USER_KEY)!;
   let transactions = getTransactions();
+  const deleted = transactions.filter(t => ids.includes(t.id));
   transactions = transactions.filter(t => !ids.includes(t.id));
+  localStorage.setItem(txKey(email), JSON.stringify(transactions));
+  return deleted;
+}
+
+export function restoreTransactions(txs: Transaction[]) {
+  const email = localStorage.getItem(ACTIVE_USER_KEY)!;
+  const transactions = getTransactions();
+  transactions.push(...txs);
+  transactions.sort((a, b) => b.timestamp - a.timestamp);
   localStorage.setItem(txKey(email), JSON.stringify(transactions));
 }
 
