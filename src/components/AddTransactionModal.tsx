@@ -1,0 +1,117 @@
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import { addTransaction, CATEGORIES } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
+
+interface AddTransactionModalProps {
+  onClose: () => void;
+  onAdded: () => void;
+}
+
+const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => {
+  const [amount, setAmount] = useState('');
+  const [type, setType] = useState<'expense' | 'income'>('expense');
+  const [selectedCat, setSelectedCat] = useState(0);
+  const [merchant, setMerchant] = useState('');
+  const { toast } = useToast();
+
+  const handleSubmit = () => {
+    const amt = Number(amount);
+    if (!amt || amt <= 0) {
+      toast({ title: 'Enter a valid amount', variant: 'destructive' });
+      return;
+    }
+    const cat = CATEGORIES[selectedCat];
+    addTransaction({
+      amount: amt,
+      type,
+      category: cat.name,
+      categoryEmoji: cat.emoji,
+      categoryColor: cat.color,
+      merchant: merchant || cat.name,
+      date: new Date().toISOString().split('T')[0],
+    });
+    toast({ title: `${type === 'income' ? 'Income' : 'Expense'} added!` });
+    onAdded();
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="w-full max-w-lg bg-card rounded-t-[40px] border border-border/50 p-6 pb-10 animate-in"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-black text-foreground">Add Transaction</h2>
+          <button onClick={onClose} className="p-2 rounded-full bg-secondary active:scale-95 transition-all">
+            <X size={18} className="text-muted-foreground" />
+          </button>
+        </div>
+
+        {/* Type Toggle */}
+        <div className="flex rounded-3xl bg-secondary p-1 mb-6">
+          <button
+            onClick={() => setType('expense')}
+            className={`flex-1 py-3 rounded-3xl text-sm font-bold transition-all ${type === 'expense' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}
+          >
+            Expense
+          </button>
+          <button
+            onClick={() => setType('income')}
+            className={`flex-1 py-3 rounded-3xl text-sm font-bold transition-all ${type === 'income' ? 'bg-success text-success-foreground' : 'text-muted-foreground'}`}
+          >
+            Income
+          </button>
+        </div>
+
+        {/* Amount */}
+        <div className="text-center mb-6">
+          <span className="text-muted-foreground text-2xl font-bold">₹</span>
+          <input
+            type="number"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            placeholder="0"
+            className="text-5xl font-black text-foreground bg-transparent text-center w-48 outline-none placeholder:text-muted-foreground/30"
+            autoFocus
+          />
+        </div>
+
+        {/* Merchant */}
+        <input
+          type="text"
+          value={merchant}
+          onChange={e => setMerchant(e.target.value)}
+          placeholder="Merchant / Note"
+          className="w-full px-5 py-3.5 rounded-3xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm mb-6"
+        />
+
+        {/* Category Grid */}
+        <div className="grid grid-cols-5 gap-2 mb-6">
+          {CATEGORIES.map((cat, i) => (
+            <button
+              key={cat.name}
+              onClick={() => setSelectedCat(i)}
+              className={`flex flex-col items-center gap-1 py-3 rounded-3xl transition-all active:scale-95 ${
+                selectedCat === i ? 'bg-primary/20 border border-primary/50' : 'bg-secondary'
+              }`}
+            >
+              <span className="text-xl">{cat.emoji}</span>
+              <span className="text-[9px] font-semibold text-muted-foreground">{cat.name}</span>
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          className="w-full py-4 rounded-3xl gradient-primary text-primary-foreground font-bold text-base active:scale-95 transition-all glow-primary"
+        >
+          Add {type === 'income' ? 'Income' : 'Expense'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default AddTransactionModal;
