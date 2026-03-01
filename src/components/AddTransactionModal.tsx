@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { addTransaction, CATEGORIES } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 interface AddTransactionModalProps {
   onClose: () => void;
@@ -13,6 +17,7 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [selectedCat, setSelectedCat] = useState(0);
   const [merchant, setMerchant] = useState('');
+  const [date, setDate] = useState<Date>(new Date());
   const { toast } = useToast();
 
   const handleSubmit = () => {
@@ -29,7 +34,7 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
       categoryEmoji: cat.emoji,
       categoryColor: cat.color,
       merchant: merchant || cat.name,
-      date: new Date().toISOString().split('T')[0],
+      date: format(date, 'yyyy-MM-dd'),
     });
     toast({ title: `${type === 'income' ? 'Income' : 'Expense'} added!` });
     onAdded();
@@ -86,6 +91,30 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
           placeholder="Merchant / Note"
           className="w-full px-5 py-3.5 rounded-3xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm mb-6"
         />
+
+        {/* Date Picker */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className={cn(
+                "w-full px-5 py-3.5 rounded-3xl bg-secondary text-sm border border-border focus:border-primary transition-all text-left flex items-center gap-3 mb-6",
+                !date && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon size={16} className="text-muted-foreground" />
+              {date ? format(date, 'EEE, dd MMM yyyy') : 'Select date'}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(d) => d && setDate(d)}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
 
         {/* Category Grid */}
         <div className="grid grid-cols-5 gap-2 mb-6">
