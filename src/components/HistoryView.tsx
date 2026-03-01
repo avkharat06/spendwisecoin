@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { getTransactions, deleteTransactions, Transaction } from '@/lib/auth';
+import { getTransactions, deleteTransactions, restoreTransactions, Transaction } from '@/lib/auth';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,10 +32,25 @@ const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
   }, [selected, transactions]);
 
   const handleDelete = () => {
-    deleteTransactions(Array.from(selected));
+    const count = selected.size;
+    const deleted = deleteTransactions(Array.from(selected));
     setSelected(new Set());
     onRefresh();
-    toast({ title: `Deleted ${selected.size} transaction(s)` });
+    toast({
+      title: `Deleted ${count} transaction(s)`,
+      action: (
+        <button
+          onClick={() => {
+            restoreTransactions(deleted);
+            onRefresh();
+            toast({ title: `Restored ${count} transaction(s)` });
+          }}
+          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all"
+        >
+          Undo
+        </button>
+      ),
+    });
   };
 
   const grouped = useMemo(() => {
