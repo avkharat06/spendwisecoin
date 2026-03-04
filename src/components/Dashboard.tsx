@@ -1,10 +1,15 @@
 import { useMemo } from 'react';
-import { getActiveUser, getTransactions, Transaction } from '@/lib/auth';
+import { getActiveUser, getTransactions, Transaction, getCurrency } from '@/lib/auth';
 import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
 
-const Dashboard = () => {
+interface DashboardProps {
+  onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
+}
+
+const Dashboard = ({ onFilterView }: DashboardProps) => {
   const user = getActiveUser();
   const transactions = getTransactions();
+  const currency = getCurrency();
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -51,7 +56,7 @@ const Dashboard = () => {
       .sort((a, b) => b.amount - a.amount);
   }, [transactions]);
 
-  const fmt = (n: number) => '₹' + Math.abs(n).toLocaleString('en-IN');
+  const fmt = (n: number) => currency + Math.abs(n).toLocaleString(currency === '₹' ? 'en-IN' : 'en-US');
 
   return (
     <div className="animate-in space-y-6 pb-4">
@@ -69,11 +74,17 @@ const Dashboard = () => {
           {stats.totalBalance >= 0 ? '+' : '-'}{fmt(stats.totalBalance)}
         </p>
 
-        {/* Today's Stats */}
+        {/* Today's Stats - Clickable */}
         <div className="grid grid-cols-3 gap-3 mt-6">
-          <StatBox icon={<TrendingDown size={14} />} label="Spent" value={fmt(stats.todaySpent)} color="text-destructive" />
-          <StatBox icon={<TrendingUp size={14} />} label="Income" value={fmt(stats.todayIncome)} color="text-success" />
-          <StatBox icon={<Minus size={14} />} label="Net" value={fmt(Math.abs(stats.todayNet))} color={stats.todayNet >= 0 ? 'text-success' : 'text-destructive'} />
+          <button onClick={() => onFilterView?.('expense')} className="active:scale-95 transition-all">
+            <StatBox icon={<TrendingDown size={14} />} label="Spent" value={fmt(stats.todaySpent)} color="text-destructive" />
+          </button>
+          <button onClick={() => onFilterView?.('income')} className="active:scale-95 transition-all">
+            <StatBox icon={<TrendingUp size={14} />} label="Income" value={fmt(stats.todayIncome)} color="text-success" />
+          </button>
+          <button onClick={() => onFilterView?.('all')} className="active:scale-95 transition-all">
+            <StatBox icon={<Minus size={14} />} label="Net" value={fmt(Math.abs(stats.todayNet))} color={stats.todayNet >= 0 ? 'text-success' : 'text-destructive'} />
+          </button>
         </div>
 
         {/* Budget Bar */}
@@ -104,7 +115,7 @@ const Dashboard = () => {
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Recent Activity</h3>
           <div className="space-y-2">
             {recentTx.map(tx => (
-              <TransactionRow key={tx.id} tx={tx} />
+              <TransactionRow key={tx.id} tx={tx} currency={currency} />
             ))}
           </div>
         </div>
@@ -151,8 +162,8 @@ const StatBox = ({ icon, label, value, color }: { icon: React.ReactNode; label: 
   </div>
 );
 
-const TransactionRow = ({ tx }: { tx: Transaction }) => {
-  const time = new Date(tx.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+const TransactionRow = ({ tx, currency }: { tx: Transaction; currency: string }) => {
+  const time = new Date(tx.timestamp).toLocaleTimeString(currency === '₹' ? 'en-IN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
   return (
     <div className="card-item flex items-center gap-3">
       <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg" style={{ backgroundColor: tx.categoryColor + '20' }}>
@@ -163,7 +174,7 @@ const TransactionRow = ({ tx }: { tx: Transaction }) => {
         <p className="text-xs text-muted-foreground">{tx.category} · {time}</p>
       </div>
       <p className={`text-sm font-bold ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>
-        {tx.type === 'income' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
+        {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
       </p>
     </div>
   );
