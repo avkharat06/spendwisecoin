@@ -110,7 +110,7 @@ export function restoreTransactions(txs: Transaction[]) {
   localStorage.setItem(txKey(email), JSON.stringify(transactions));
 }
 
-export const CATEGORIES = [
+export const DEFAULT_CATEGORIES = [
   { name: 'Food', emoji: '🍔', color: '#F59E0B' },
   { name: 'Transport', emoji: '🚗', color: '#3B82F6' },
   { name: 'Shopping', emoji: '🛍️', color: '#EC4899' },
@@ -122,3 +122,38 @@ export const CATEGORIES = [
   { name: 'Investment', emoji: '📈', color: '#F97316' },
   { name: 'Other', emoji: '📦', color: '#6B7280' },
 ];
+
+// Keep backward compat
+export const CATEGORIES = DEFAULT_CATEGORIES;
+
+const CUSTOM_CAT_KEY = 'spendwise_custom_categories';
+
+export interface Category {
+  name: string;
+  emoji: string;
+  color: string;
+}
+
+export function getCustomCategories(): Category[] {
+  const email = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!email) return [];
+  const raw = localStorage.getItem(`${CUSTOM_CAT_KEY}_${email}`);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export function addCustomCategory(cat: Category) {
+  const email = localStorage.getItem(ACTIVE_USER_KEY)!;
+  const cats = getCustomCategories();
+  cats.push(cat);
+  localStorage.setItem(`${CUSTOM_CAT_KEY}_${email}`, JSON.stringify(cats));
+}
+
+export function deleteCustomCategory(name: string) {
+  const email = localStorage.getItem(ACTIVE_USER_KEY)!;
+  const cats = getCustomCategories().filter(c => c.name !== name);
+  localStorage.setItem(`${CUSTOM_CAT_KEY}_${email}`, JSON.stringify(cats));
+}
+
+export function getAllCategories(): Category[] {
+  return [...DEFAULT_CATEGORIES, ...getCustomCategories()];
+}
