@@ -1,18 +1,25 @@
 import { useState, useMemo } from 'react';
-import { getTransactions, deleteTransactions, restoreTransactions, Transaction } from '@/lib/auth';
-import { Trash2 } from 'lucide-react';
+import { getTransactions, deleteTransactions, restoreTransactions, Transaction, getCurrency } from '@/lib/auth';
+import { Trash2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SwipeableTransaction from './SwipeableTransaction';
 
 interface HistoryViewProps {
   refresh: number;
   onRefresh: () => void;
+  filter?: 'expense' | 'income' | 'all';
+  onBack?: () => void;
 }
 
-const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
-  const transactions = useMemo(() => getTransactions(), [refresh]);
+const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) => {
+  const allTransactions = useMemo(() => getTransactions(), [refresh]);
+  const transactions = useMemo(() => {
+    if (!filter || filter === 'all') return allTransactions;
+    return allTransactions.filter(tx => tx.type === filter);
+  }, [allTransactions, filter]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const currency = getCurrency();
 
   const toggle = (id: string) => {
     setSelected(prev => {
@@ -85,11 +92,20 @@ const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
     return Object.entries(groups).sort(([a], [b]) => b.localeCompare(a));
   }, [transactions]);
 
-  const fmt = (n: number) => '₹' + Math.abs(n).toLocaleString('en-IN');
+  const fmt = (n: number) => currency + Math.abs(n).toLocaleString(currency === '₹' ? 'en-IN' : 'en-US');
+
+  const title = filter === 'expense' ? 'Expenses' : filter === 'income' ? 'Income' : 'History';
 
   return (
     <div className="animate-in pb-4">
-      <h2 className="text-2xl font-black text-foreground mb-4">History</h2>
+      <div className="flex items-center gap-3 mb-4">
+        {onBack && (
+          <button onClick={onBack} className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all">
+            <ArrowLeft size={18} className="text-foreground" />
+          </button>
+        )}
+        <h2 className="text-2xl font-black text-foreground">{title}</h2>
+      </div>
 
       {/* Selection Summary */}
       {selected.size > 0 && (
@@ -109,7 +125,7 @@ const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
       {grouped.map(([date, txs]) => (
         <div key={date} className="mb-4">
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
-            {new Date(date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
+            {new Date(date + 'T00:00:00').toLocaleDateString(currency === '₹' ? 'en-IN' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
           </p>
           <div className="space-y-2">
             {txs.map(tx => {
@@ -131,7 +147,7 @@ const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
                       <p className="text-xs text-muted-foreground">{tx.category}</p>
                     </div>
                     <p className={`text-sm font-bold ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>
-                      {tx.type === 'income' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
+                      {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
                     </p>
                   </div>
                 </SwipeableTransaction>
@@ -144,7 +160,7 @@ const HistoryView = ({ refresh, onRefresh }: HistoryViewProps) => {
       {transactions.length === 0 && (
         <div className="text-center py-16">
           <p className="text-4xl mb-3">📋</p>
-          <p className="text-muted-foreground font-medium">No transactions yet</p>
+          <p className="text-muted-foreground font-medium">No {filter === 'expense' ? 'expenses' : filter === 'income' ? 'income' : 'transactions'} yet</p>
         </div>
       )}
     </div>

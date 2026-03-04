@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import { addTransaction, getAllCategories } from '@/lib/auth';
+import { addTransaction, getAllCategories, getCurrency } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -22,6 +22,7 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [catRefresh, setCatRefresh] = useState(0);
   const { toast } = useToast();
+  const currency = getCurrency();
 
   const categories = getAllCategories();
 
@@ -82,7 +83,7 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
 
           {/* Amount */}
           <div className="text-center mb-6">
-            <span className="text-muted-foreground text-2xl font-bold">₹</span>
+            <span className="text-muted-foreground text-2xl font-bold">{currency}</span>
             <input
               type="number"
               value={amount}

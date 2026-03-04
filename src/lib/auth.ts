@@ -3,6 +3,7 @@ export interface User {
   email: string;
   password: string;
   monthlyBudget: number;
+  currency: '₹' | '$';
 }
 
 export interface Transaction {
@@ -33,7 +34,7 @@ function saveRegistry(registry: Record<string, User>) {
 export function signUp(name: string, email: string, password: string, monthlyBudget: number): { success: boolean; error?: string } {
   const registry = getRegistry();
   if (registry[email]) return { success: false, error: 'Account already exists' };
-  registry[email] = { name, email, password, monthlyBudget };
+  registry[email] = { name, email, password, monthlyBudget, currency: '₹' };
   saveRegistry(registry);
   localStorage.setItem(ACTIVE_USER_KEY, email);
   return { success: true };
@@ -65,6 +66,21 @@ export function updateBudget(budget: number) {
   const registry = getRegistry();
   if (registry[email]) {
     registry[email].monthlyBudget = budget;
+    saveRegistry(registry);
+  }
+}
+
+export function getCurrency(): '₹' | '$' {
+  const user = getActiveUser();
+  return user?.currency || '₹';
+}
+
+export function setCurrency(currency: '₹' | '$') {
+  const email = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!email) return;
+  const registry = getRegistry();
+  if (registry[email]) {
+    registry[email].currency = currency;
     saveRegistry(registry);
   }
 }
@@ -123,7 +139,6 @@ export const DEFAULT_CATEGORIES = [
   { name: 'Other', emoji: '📦', color: '#6B7280' },
 ];
 
-// Keep backward compat
 export const CATEGORIES = DEFAULT_CATEGORIES;
 
 const CUSTOM_CAT_KEY = 'spendwise_custom_categories';
@@ -156,4 +171,35 @@ export function deleteCustomCategory(name: string) {
 
 export function getAllCategories(): Category[] {
   return [...DEFAULT_CATEGORIES, ...getCustomCategories()];
+}
+
+// Seed sample data for testing
+export function seedSampleData() {
+  const email = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!email) return;
+  const existing = getTransactions();
+  if (existing.length > 0) return; // Don't overwrite
+
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const yesterday = new Date(now.getTime() - 86400000).toISOString().split('T')[0];
+  const twoDaysAgo = new Date(now.getTime() - 2 * 86400000).toISOString().split('T')[0];
+  const threeDaysAgo = new Date(now.getTime() - 3 * 86400000).toISOString().split('T')[0];
+
+  const samples: Transaction[] = [
+    { id: crypto.randomUUID(), amount: 350, type: 'expense', category: 'Food', categoryEmoji: '🍔', categoryColor: '#F59E0B', merchant: 'Swiggy Order', date: today, timestamp: now.getTime() - 3600000 },
+    { id: crypto.randomUUID(), amount: 45000, type: 'income', category: 'Salary', categoryEmoji: '💰', categoryColor: '#10B981', merchant: 'Monthly Salary', date: today, timestamp: now.getTime() - 7200000 },
+    { id: crypto.randomUUID(), amount: 120, type: 'expense', category: 'Transport', categoryEmoji: '🚗', categoryColor: '#3B82F6', merchant: 'Uber Ride', date: today, timestamp: now.getTime() - 10800000 },
+    { id: crypto.randomUUID(), amount: 2500, type: 'expense', category: 'Shopping', categoryEmoji: '🛍️', categoryColor: '#EC4899', merchant: 'Amazon', date: yesterday, timestamp: now.getTime() - 86400000 },
+    { id: crypto.randomUUID(), amount: 799, type: 'expense', category: 'Entertainment', categoryEmoji: '🎮', categoryColor: '#8B5CF6', merchant: 'Netflix', date: yesterday, timestamp: now.getTime() - 90000000 },
+    { id: crypto.randomUUID(), amount: 1500, type: 'expense', category: 'Bills', categoryEmoji: '📱', categoryColor: '#EF4444', merchant: 'Jio Recharge', date: yesterday, timestamp: now.getTime() - 100000000 },
+    { id: crypto.randomUUID(), amount: 5000, type: 'income', category: 'Freelance', categoryEmoji: '💻', categoryColor: '#06B6D4', merchant: 'Client Payment', date: twoDaysAgo, timestamp: now.getTime() - 172800000 },
+    { id: crypto.randomUUID(), amount: 450, type: 'expense', category: 'Health', categoryEmoji: '💊', categoryColor: '#10B981', merchant: 'Apollo Pharmacy', date: twoDaysAgo, timestamp: now.getTime() - 180000000 },
+    { id: crypto.randomUUID(), amount: 200, type: 'expense', category: 'Food', categoryEmoji: '🍔', categoryColor: '#F59E0B', merchant: 'Chai Point', date: threeDaysAgo, timestamp: now.getTime() - 259200000 },
+    { id: crypto.randomUUID(), amount: 10000, type: 'income', category: 'Investment', categoryEmoji: '📈', categoryColor: '#F97316', merchant: 'Dividend', date: threeDaysAgo, timestamp: now.getTime() - 270000000 },
+    { id: crypto.randomUUID(), amount: 180, type: 'expense', category: 'Transport', categoryEmoji: '🚗', categoryColor: '#3B82F6', merchant: 'Metro Card', date: threeDaysAgo, timestamp: now.getTime() - 280000000 },
+    { id: crypto.randomUUID(), amount: 3200, type: 'expense', category: 'Shopping', categoryEmoji: '🛍️', categoryColor: '#EC4899', merchant: 'Myntra', date: threeDaysAgo, timestamp: now.getTime() - 290000000 },
+  ];
+
+  localStorage.setItem(txKey(email), JSON.stringify(samples));
 }
