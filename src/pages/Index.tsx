@@ -5,7 +5,8 @@ import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
-import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home } from 'lucide-react';
+import DeletedHistoryView from '@/components/DeletedHistoryView';
+import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
