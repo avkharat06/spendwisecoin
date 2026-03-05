@@ -5,7 +5,8 @@ import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
-import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home } from 'lucide-react';
+import DeletedHistoryView from '@/components/DeletedHistoryView';
+import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -17,7 +18,7 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-type ViewType = 'home' | 'history' | 'insights' | 'filtered';
+type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted';
 
 const Index = () => {
   const [authed, setAuthed] = useState(!!getActiveUser());
@@ -103,6 +104,10 @@ const Index = () => {
                 <DollarSign size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Currency: {currency}</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">Deleted History</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border/50" />
               <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="rounded-xl py-2.5 px-3 cursor-pointer text-destructive focus:text-destructive">
                 <LogOut size={16} className="mr-2.5" />
@@ -120,6 +125,7 @@ const Index = () => {
         {view === 'history' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} onBack={() => setView('home')} />}
         {view === 'filtered' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} filter={txFilter} onBack={() => setView('home')} />}
         {view === 'insights' && <InsightsView />}
+        {view === 'deleted' && <DeletedHistoryView refresh={refresh} onRefresh={triggerRefresh} onBack={() => setView('home')} />}
       </div>
 
       {/* FAB */}
