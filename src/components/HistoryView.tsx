@@ -1,8 +1,11 @@
 import { useState, useMemo } from 'react';
 import { getTransactions, deleteTransactions, restoreTransactions, Transaction, getCurrency } from '@/lib/auth';
-import { Trash2, ArrowLeft } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SwipeableTransaction from './SwipeableTransaction';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface HistoryViewProps {
   refresh: number;
@@ -13,13 +16,36 @@ interface HistoryViewProps {
 
 const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) => {
   const allTransactions = useMemo(() => getTransactions(), [refresh]);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const transactions = useMemo(() => {
-    if (!filter || filter === 'all') return allTransactions;
-    return allTransactions.filter(tx => tx.type === filter);
-  }, [allTransactions, filter]);
+    let filtered = allTransactions;
+    if (filter && filter !== 'all') filtered = filtered.filter(tx => tx.type === filter);
+    if (selectedMonth) {
+      filtered = filtered.filter(tx => {
+        const d = tx.date || new Date(tx.timestamp).toISOString().split('T')[0];
+        return d.startsWith(selectedMonth);
+      });
+    }
+    return filtered;
+  }, [allTransactions, filter, selectedMonth]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const currency = getCurrency();
+
+  // Get available months
+  const availableMonths = useMemo(() => {
+    const months = new Set<string>();
+    allTransactions.forEach(tx => {
+      const d = tx.date || new Date(tx.timestamp).toISOString().split('T')[0];
+      months.add(d.slice(0, 7)); // YYYY-MM
+    });
+    return Array.from(months).sort((a, b) => b.localeCompare(a));
+  }, [allTransactions]);
+
+  const formatMonth = (ym: string) => {
+    const [y, m] = ym.split('-');
+    return new Date(parseInt(y), parseInt(m) - 1).toLocaleDateString(currency === '₹' ? 'en-IN' : 'en-US', { month: 'short', year: 'numeric' });
+  };
 
   const toggle = (id: string) => {
     setSelected(prev => {
@@ -28,6 +54,15 @@ const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) =
       return next;
     });
   };
+
+  const selectAll = () => {
+    const allIds = new Set(transactions.map(tx => tx.id));
+    setSelected(allIds);
+  };
+
+  const deselectAll = () => setSelected(new Set());
+
+  const allSelected = transactions.length > 0 && transactions.every(tx => selected.has(tx.id));
 
   const selectionTotal = useMemo(() => {
     let total = 0;
@@ -104,7 +139,43 @@ const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) =
             <ArrowLeft size={18} className="text-foreground" />
           </button>
         )}
-        <h2 className="text-2xl font-black text-foreground">{title}</h2>
+        <h2 className="text-2xl font-black text-foreground flex-1">{title}</h2>
+
+        {/* Select All / Deselect */}
+        <button
+          onClick={allSelected ? deselectAll : selectAll}
+          className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all"
+          title={allSelected ? 'Deselect all' : 'Select all'}
+        >
+          {allSelected ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-muted-foreground" />}
+        </button>
+
+        {/* Month Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1 px-3 py-2 rounded-2xl bg-secondary text-xs font-semibold text-foreground active:scale-95 transition-all">
+              {selectedMonth ? formatMonth(selectedMonth) : 'All'}
+              <ChevronDown size={14} className="text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="rounded-2xl border-border/50 bg-card p-1.5 max-h-60 overflow-y-auto">
+            <DropdownMenuItem
+              onClick={() => { setSelectedMonth(null); setSelected(new Set()); }}
+              className="rounded-xl py-2.5 px-3 cursor-pointer"
+            >
+              <span className={`text-sm font-medium ${!selectedMonth ? 'text-primary' : ''}`}>All Months</span>
+            </DropdownMenuItem>
+            {availableMonths.map(m => (
+              <DropdownMenuItem
+                key={m}
+                onClick={() => { setSelectedMonth(m); setSelected(new Set()); }}
+                className="rounded-xl py-2.5 px-3 cursor-pointer"
+              >
+                <span className={`text-sm font-medium ${selectedMonth === m ? 'text-primary' : ''}`}>{formatMonth(m)}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Selection Summary */}
@@ -116,9 +187,14 @@ const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) =
               {selectionTotal >= 0 ? '+' : '-'}{fmt(selectionTotal)}
             </p>
           </div>
-          <button onClick={handleDelete} className="p-3 rounded-2xl bg-destructive/20 active:scale-95 transition-all">
-            <Trash2 size={18} className="text-destructive" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={deselectAll} className="p-2.5 rounded-2xl bg-secondary active:scale-95 transition-all">
+              <Square size={16} className="text-muted-foreground" />
+            </button>
+            <button onClick={handleDelete} className="p-3 rounded-2xl bg-destructive/20 active:scale-95 transition-all">
+              <Trash2 size={18} className="text-destructive" />
+            </button>
+          </div>
         </div>
       )}
 
