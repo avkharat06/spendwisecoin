@@ -109,7 +109,7 @@ const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) =
 
       {/* Selection Summary */}
       {selected.size > 0 && (
-        <div className="card-premium flex items-center justify-between mb-4">
+        <div className="sticky top-14 z-20 card-premium flex items-center justify-between mb-4 backdrop-blur-xl">
           <div>
             <p className="text-xs text-muted-foreground font-semibold">{selected.size} selected</p>
             <p className={`text-lg font-black ${selectionTotal >= 0 ? 'text-success' : 'text-destructive'}`}>
