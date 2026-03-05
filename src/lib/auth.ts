@@ -89,11 +89,34 @@ function txKey(email: string) {
   return `spendwise_tx_${email}`;
 }
 
+function deletedTxKey(email: string) {
+  return `spendwise_deleted_tx_${email}`;
+}
+
+export interface DeletedTransaction extends Transaction {
+  deletedAt: number;
+}
+
 export function getTransactions(): Transaction[] {
   const email = localStorage.getItem(ACTIVE_USER_KEY);
   if (!email) return [];
   const raw = localStorage.getItem(txKey(email));
   return raw ? JSON.parse(raw) : [];
+}
+
+export function getDeletedTransactions(): DeletedTransaction[] {
+  const email = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!email) return [];
+  const raw = localStorage.getItem(deletedTxKey(email));
+  if (!raw) return [];
+  const all: DeletedTransaction[] = JSON.parse(raw);
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const valid = all.filter(t => t.deletedAt > thirtyDaysAgo);
+  // Auto-purge expired
+  if (valid.length !== all.length) {
+    localStorage.setItem(deletedTxKey(email), JSON.stringify(valid));
+  }
+  return valid;
 }
 
 export function addTransaction(tx: Omit<Transaction, 'id' | 'timestamp'>): Transaction {
@@ -115,6 +138,11 @@ export function deleteTransactions(ids: string[]): Transaction[] {
   const deleted = transactions.filter(t => ids.includes(t.id));
   transactions = transactions.filter(t => !ids.includes(t.id));
   localStorage.setItem(txKey(email), JSON.stringify(transactions));
+  // Store in deleted history
+  const deletedHistory = getDeletedTransactions();
+  const now = Date.now();
+  deleted.forEach(t => deletedHistory.unshift({ ...t, deletedAt: now }));
+  localStorage.setItem(deletedTxKey(email), JSON.stringify(deletedHistory));
   return deleted;
 }
 
@@ -124,6 +152,17 @@ export function restoreTransactions(txs: Transaction[]) {
   transactions.push(...txs);
   transactions.sort((a, b) => b.timestamp - a.timestamp);
   localStorage.setItem(txKey(email), JSON.stringify(transactions));
+  // Remove from deleted history
+  const ids = new Set(txs.map(t => t.id));
+  const deletedHistory = getDeletedTransactions().filter(t => !ids.has(t.id));
+  localStorage.setItem(deletedTxKey(email), JSON.stringify(deletedHistory));
+}
+
+export function permanentlyDeleteFromHistory(ids: string[]) {
+  const email = localStorage.getItem(ACTIVE_USER_KEY)!;
+  const idSet = new Set(ids);
+  const deletedHistory = getDeletedTransactions().filter(t => !idSet.has(t.id));
+  localStorage.setItem(deletedTxKey(email), JSON.stringify(deletedHistory));
 }
 
 export const DEFAULT_CATEGORIES = [
