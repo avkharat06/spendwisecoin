@@ -5,7 +5,7 @@ import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
-import { Plus, Clock, Lightbulb, LogOut, DollarSign } from 'lucide-react';
+import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -87,6 +87,10 @@ const Index = () => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48 rounded-2xl border-border/50 bg-card p-1.5">
+              <DropdownMenuItem onClick={() => setView('home')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                <Home size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">Home</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setView('history')} className="rounded-xl py-2.5 px-3 cursor-pointer">
                 <Clock size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">History</span>
