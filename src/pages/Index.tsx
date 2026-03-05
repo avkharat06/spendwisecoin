@@ -18,7 +18,7 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-type ViewType = 'home' | 'history' | 'insights' | 'filtered';
+type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted';
 
 const Index = () => {
   const [authed, setAuthed] = useState(!!getActiveUser());
