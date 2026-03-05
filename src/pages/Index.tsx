@@ -104,6 +104,10 @@ const Index = () => {
                 <DollarSign size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Currency: {currency}</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">Deleted History</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border/50" />
               <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="rounded-xl py-2.5 px-3 cursor-pointer text-destructive focus:text-destructive">
                 <LogOut size={16} className="mr-2.5" />
