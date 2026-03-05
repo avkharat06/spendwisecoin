@@ -69,8 +69,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative">
-      <div className="fixed top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full pointer-events-none" style={{ background: 'var(--gradient-glow-primary)' }} />
-      <div className="fixed bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full pointer-events-none" style={{ background: 'var(--gradient-glow-accent)' }} />
+      <div className="fixed top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full pointer-events-none overflow-hidden" style={{ background: 'var(--gradient-glow-primary)' }} />
+      <div className="fixed bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full pointer-events-none overflow-hidden" style={{ background: 'var(--gradient-glow-accent)' }} />
 
       {/* Header */}
       <div className="sticky top-0 z-30 glass-strong">
