@@ -1,6 +1,6 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { getTransactions, deleteTransactions, restoreTransactions, Transaction, getCurrency } from '@/lib/auth';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SwipeableTransaction from './SwipeableTransaction';
 import {
@@ -31,8 +31,6 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
     return filtered;
   }, [allTransactions, filter, categoryFilter, selectedMonth]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [selectionMode, setSelectionMode] = useState(false);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
   const currency = getCurrency();
 
@@ -41,7 +39,7 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
     const months = new Set<string>();
     allTransactions.forEach(tx => {
       const d = tx.date || new Date(tx.timestamp).toISOString().split('T')[0];
-      months.add(d.slice(0, 7));
+      months.add(d.slice(0, 7)); // YYYY-MM
     });
     return Array.from(months).sort((a, b) => b.localeCompare(a));
   }, [allTransactions]);
@@ -52,38 +50,16 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
   };
 
   const toggle = (id: string) => {
-    if (!selectionMode) return;
     setSelected(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
-      if (next.size === 0) setSelectionMode(false);
       return next;
     });
   };
 
-  const handleLongPress = useCallback((id: string) => {
-    setSelectionMode(true);
-    setSelected(new Set([id]));
-  }, []);
-
-  const startLongPress = useCallback((id: string) => {
-    longPressTimer.current = setTimeout(() => handleLongPress(id), 500);
-  }, [handleLongPress]);
-
-  const cancelLongPress = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }, []);
-
-  const exitSelectionMode = () => {
-    setSelectionMode(false);
-    setSelected(new Set());
-  };
-
   const selectAll = () => {
-    setSelected(new Set(transactions.map(tx => tx.id)));
+    const allIds = new Set(transactions.map(tx => tx.id));
+    setSelected(allIds);
   };
 
   const deselectAll = () => setSelected(new Set());
@@ -103,7 +79,7 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
   const handleDelete = () => {
     const count = selected.size;
     const deleted = deleteTransactions(Array.from(selected));
-    exitSelectionMode();
+    setSelected(new Set());
     onRefresh();
     toast({
       title: `Deleted ${count} transaction(s)`,
@@ -124,7 +100,7 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
 
   const handleSingleDelete = (id: string) => {
     const deleted = deleteTransactions([id]);
-    setSelected(prev => { const n = new Set(prev); n.delete(id); if (n.size === 0) setSelectionMode(false); return n; });
+    setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
     onRefresh();
     toast({
       title: 'Transaction deleted',
@@ -167,26 +143,14 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
         )}
         <h2 className="text-2xl font-black text-foreground flex-1">{title}</h2>
 
-        {/* Select All / Deselect - only visible in selection mode */}
-        {selectionMode && (
-          <button
-            onClick={allSelected ? deselectAll : selectAll}
-            className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all"
-            title={allSelected ? 'Deselect all' : 'Select all'}
-          >
-            {allSelected ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-muted-foreground" />}
-          </button>
-        )}
-
-        {/* Exit selection mode */}
-        {selectionMode && (
-          <button
-            onClick={exitSelectionMode}
-            className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all"
-          >
-            <X size={18} className="text-muted-foreground" />
-          </button>
-        )}
+        {/* Select All / Deselect */}
+        <button
+          onClick={allSelected ? deselectAll : selectAll}
+          className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all"
+          title={allSelected ? 'Deselect all' : 'Select all'}
+        >
+          {allSelected ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-muted-foreground" />}
+        </button>
 
         {/* Month Filter */}
         <DropdownMenu>
@@ -198,7 +162,7 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-2xl border-border/50 bg-card p-1.5 max-h-60 overflow-y-auto">
             <DropdownMenuItem
-              onClick={() => { setSelectedMonth(null); exitSelectionMode(); }}
+              onClick={() => { setSelectedMonth(null); setSelected(new Set()); }}
               className="rounded-xl py-2.5 px-3 cursor-pointer"
             >
               <span className={`text-sm font-medium ${!selectedMonth ? 'text-primary' : ''}`}>All Months</span>
@@ -206,7 +170,7 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
             {availableMonths.map(m => (
               <DropdownMenuItem
                 key={m}
-                onClick={() => { setSelectedMonth(m); exitSelectionMode(); }}
+                onClick={() => { setSelectedMonth(m); setSelected(new Set()); }}
                 className="rounded-xl py-2.5 px-3 cursor-pointer"
               >
                 <span className={`text-sm font-medium ${selectedMonth === m ? 'text-primary' : ''}`}>{formatMonth(m)}</span>
@@ -217,7 +181,7 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
       </div>
 
       {/* Selection Summary */}
-      {selectionMode && selected.size > 0 && (
+      {selected.size > 0 && (
         <div className="sticky top-14 z-20 card-premium flex items-center justify-between mb-4 backdrop-blur-xl">
           <div>
             <p className="text-xs text-muted-foreground font-semibold">{selected.size} selected</p>
@@ -236,11 +200,6 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
         </div>
       )}
 
-      {/* Long press hint */}
-      {!selectionMode && transactions.length > 0 && (
-        <p className="text-[10px] text-muted-foreground/60 text-center mb-3">Long press to select</p>
-      )}
-
       {grouped.map(([date, txs]) => (
         <div key={date} className="mb-4">
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
@@ -253,19 +212,11 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
                 <SwipeableTransaction key={tx.id} onDelete={() => handleSingleDelete(tx.id)}>
                   <div
                     onClick={() => toggle(tx.id)}
-                    onTouchStart={() => startLongPress(tx.id)}
-                    onTouchEnd={cancelLongPress}
-                    onTouchMove={cancelLongPress}
-                    onMouseDown={() => startLongPress(tx.id)}
-                    onMouseUp={cancelLongPress}
-                    onMouseLeave={cancelLongPress}
-                    className={`card-item flex items-center gap-3 cursor-pointer transition-all select-none ${isSelected ? 'border-primary/50' : ''}`}
+                    className={`card-item flex items-center gap-3 cursor-pointer transition-all ${isSelected ? 'border-primary/50' : ''}`}
                   >
-                    {selectionMode && (
-                      <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
-                        {isSelected && <div className="w-2 h-2 rounded-sm bg-primary-foreground" />}
-                      </div>
-                    )}
+                    <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
+                      {isSelected && <div className="w-2 h-2 rounded-sm bg-primary-foreground" />}
+                    </div>
                     <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg" style={{ backgroundColor: tx.categoryColor + '20' }}>
                       {tx.categoryEmoji}
                     </div>
