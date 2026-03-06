@@ -4,9 +4,10 @@ import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
 
 interface DashboardProps {
   onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
+  onCategoryView?: (category: string) => void;
 }
 
-const Dashboard = ({ onFilterView }: DashboardProps) => {
+const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
   const user = getActiveUser();
   const transactions = getTransactions();
   const currency = getCurrency();
@@ -127,7 +128,11 @@ const Dashboard = ({ onFilterView }: DashboardProps) => {
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Spending by Category</h3>
           <div className="card-premium space-y-4">
             {categoryBreakdown.map(cat => (
-              <div key={cat.name}>
+              <button
+                key={cat.name}
+                onClick={() => onCategoryView?.(cat.name)}
+                className="w-full text-left active:scale-[0.98] transition-all"
+              >
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-foreground font-medium">{cat.emoji} {cat.name}</span>
                   <span className="text-muted-foreground">{fmt(cat.amount)}</span>
@@ -138,7 +143,7 @@ const Dashboard = ({ onFilterView }: DashboardProps) => {
                     style={{ width: `${cat.percent}%`, backgroundColor: cat.color }}
                   />
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

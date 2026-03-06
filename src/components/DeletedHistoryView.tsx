@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getDeletedTransactions, restoreTransactions, permanentlyDeleteFromHistory, DeletedTransaction, getCurrency } from '@/lib/auth';
+import { getDeletedTransactions, restoreTransactions, permanentlyDeleteFromHistory, deleteTransactions, DeletedTransaction, getCurrency } from '@/lib/auth';
 import { ArrowLeft, RotateCcw, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,10 +21,27 @@ const DeletedHistoryView = ({ refresh, onRefresh, onBack }: DeletedHistoryViewPr
     toast({ title: 'Transaction restored' });
   };
 
-  const handlePermanentDelete = (id: string) => {
-    permanentlyDeleteFromHistory([id]);
+  const handlePermanentDelete = (tx: DeletedTransaction) => {
+    permanentlyDeleteFromHistory([tx.id]);
     onRefresh();
-    toast({ title: 'Permanently deleted' });
+    toast({
+      title: 'Permanently deleted',
+      action: (
+        <button
+          onClick={() => {
+            // Restore the transaction back, then re-delete to put it back in deleted history
+            const { deletedAt, ...original } = tx;
+            restoreTransactions([original]);
+            deleteTransactions([original.id]);
+            onRefresh();
+            toast({ title: 'Restored to deleted history' });
+          }}
+          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all"
+        >
+          Undo
+        </button>
+      ),
+    });
   };
 
   const daysLeft = (deletedAt: number) => {
@@ -69,7 +86,7 @@ const DeletedHistoryView = ({ refresh, onRefresh, onBack }: DeletedHistoryViewPr
               <button onClick={() => handleRestore(tx)} className="p-2 rounded-xl bg-primary/10 active:scale-95 transition-all">
                 <RotateCcw size={14} className="text-primary" />
               </button>
-              <button onClick={() => handlePermanentDelete(tx.id)} className="p-2 rounded-xl bg-destructive/10 active:scale-95 transition-all">
+              <button onClick={() => handlePermanentDelete(tx)} className="p-2 rounded-xl bg-destructive/10 active:scale-95 transition-all">
                 <Trash2 size={14} className="text-destructive" />
               </button>
             </div>
