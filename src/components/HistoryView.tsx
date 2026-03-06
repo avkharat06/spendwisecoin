@@ -11,15 +11,17 @@ interface HistoryViewProps {
   refresh: number;
   onRefresh: () => void;
   filter?: 'expense' | 'income' | 'all';
+  categoryFilter?: string;
   onBack?: () => void;
 }
 
-const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) => {
+const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: HistoryViewProps) => {
   const allTransactions = useMemo(() => getTransactions(), [refresh]);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const transactions = useMemo(() => {
     let filtered = allTransactions;
     if (filter && filter !== 'all') filtered = filtered.filter(tx => tx.type === filter);
+    if (categoryFilter) filtered = filtered.filter(tx => tx.category === categoryFilter);
     if (selectedMonth) {
       filtered = filtered.filter(tx => {
         const d = tx.date || new Date(tx.timestamp).toISOString().split('T')[0];
@@ -27,7 +29,7 @@ const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) =
       });
     }
     return filtered;
-  }, [allTransactions, filter, selectedMonth]);
+  }, [allTransactions, filter, categoryFilter, selectedMonth]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const currency = getCurrency();
@@ -129,7 +131,7 @@ const HistoryView = ({ refresh, onRefresh, filter, onBack }: HistoryViewProps) =
 
   const fmt = (n: number) => currency + Math.abs(n).toLocaleString(currency === '₹' ? 'en-IN' : 'en-US');
 
-  const title = filter === 'expense' ? 'Expenses' : filter === 'income' ? 'Income' : 'History';
+  const title = categoryFilter ? categoryFilter : filter === 'expense' ? 'Expenses' : filter === 'income' ? 'Income' : 'History';
 
   return (
     <div className="animate-in pb-4">
