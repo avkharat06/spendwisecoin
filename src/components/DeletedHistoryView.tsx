@@ -21,10 +21,29 @@ const DeletedHistoryView = ({ refresh, onRefresh, onBack }: DeletedHistoryViewPr
     toast({ title: 'Transaction restored' });
   };
 
-  const handlePermanentDelete = (id: string) => {
-    permanentlyDeleteFromHistory([id]);
+  const handlePermanentDelete = (tx: DeletedTransaction) => {
+    permanentlyDeleteFromHistory([tx.id]);
     onRefresh();
-    toast({ title: 'Permanently deleted' });
+    toast({
+      title: 'Permanently deleted',
+      action: (
+        <button
+          onClick={() => {
+            // Re-add to deleted history by restoring then re-deleting... or just re-insert
+            const { deletedAt, ...original } = tx;
+            restoreTransactions([original]);
+            // Now delete again to put back in deleted history
+            const { deleteTransactions } = require('@/lib/auth');
+            deleteTransactions([original.id]);
+            onRefresh();
+            toast({ title: 'Restored to deleted history' });
+          }}
+          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all"
+        >
+          Undo
+        </button>
+      ),
+    });
   };
 
   const daysLeft = (deletedAt: number) => {
