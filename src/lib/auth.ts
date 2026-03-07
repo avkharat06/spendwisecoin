@@ -60,6 +60,30 @@ export function getActiveUser(): User | null {
   return registry[email] || null;
 }
 
+export function updateProfile(updates: Partial<Pick<User, 'name' | 'email' | 'password'>>) {
+  const email = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!email) return { success: false, error: 'Not logged in' };
+  const registry = getRegistry();
+  const user = registry[email];
+  if (!user) return { success: false, error: 'User not found' };
+  const newEmail = updates.email && updates.email !== email ? updates.email : null;
+  if (newEmail && registry[newEmail]) return { success: false, error: 'Email already in use' };
+  if (updates.name) user.name = updates.name;
+  if (updates.password) user.password = updates.password;
+  if (newEmail) {
+    delete registry[email];
+    user.email = newEmail;
+    registry[newEmail] = user;
+    const keys = ['spendwise_tx_', 'spendwise_deleted_tx_', 'spendwise_custom_categories_', 'spendwise_prefs_'];
+    keys.forEach(k => { const d = localStorage.getItem(k + email); if (d) { localStorage.setItem(k + newEmail, d); localStorage.removeItem(k + email); } });
+    localStorage.setItem(ACTIVE_USER_KEY, newEmail);
+  } else {
+    registry[email] = user;
+  }
+  saveRegistry(registry);
+  return { success: true };
+}
+
 export function updateBudget(budget: number) {
   const email = localStorage.getItem(ACTIVE_USER_KEY);
   if (!email) return;
