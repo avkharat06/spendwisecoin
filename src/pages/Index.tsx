@@ -1,12 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
-import { getActiveUser, signOut, seedSampleData, getCurrency, setCurrency as setCurrencyPref, updateBudget } from '@/lib/auth';
+import { useState, useCallback } from 'react';
+import { getActiveUser, signOut, getCurrency, setCurrency as setCurrencyPref, updateBudget, getPrefs, setPrefs } from '@/lib/auth';
 import AuthScreen from '@/components/AuthScreen';
 import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
-import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home, Trash2, Wallet, MessageSquare, X, Send } from 'lucide-react';
+import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home, Trash2, Wallet, MessageSquare, X, Send, Eye, EyeOff, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -39,13 +39,14 @@ const Index = () => {
   const triggerRefresh = useCallback(() => setRefresh(r => r + 1), []);
   const user = getActiveUser();
 
-  // Seed sample data on first login
-  useEffect(() => {
-    if (authed) {
-      seedSampleData();
-      triggerRefresh();
-    }
-  }, [authed]);
+  const [prefs, setPrefsState] = useState(getPrefs());
+
+  const updatePref = (p: Partial<typeof prefs>) => {
+    const updated = { ...prefs, ...p };
+    setPrefs(p);
+    setPrefsState(updated);
+    triggerRefresh();
+  };
 
   const handleLogout = () => {
     signOut();
@@ -142,10 +143,28 @@ const Index = () => {
                 <DollarSign size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Currency: {currency}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setBudgetValue(String(user?.monthlyBudget || '')); setShowBudgetEdit(true); }} className="rounded-xl py-2.5 px-3 cursor-pointer">
-                <Wallet size={16} className="mr-2.5 text-muted-foreground" />
-                <span className="text-sm font-medium">Edit Budget</span>
+              <DropdownMenuItem onClick={() => updatePref({ showRecentActivity: !prefs.showRecentActivity })} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                {prefs.showRecentActivity ? <EyeOff size={16} className="mr-2.5 text-muted-foreground" /> : <Eye size={16} className="mr-2.5 text-muted-foreground" />}
+                <span className="text-sm font-medium">{prefs.showRecentActivity ? 'Hide' : 'Show'} Recent Activity</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (prefs.budgetEnabled) {
+                  updatePref({ budgetEnabled: false });
+                } else {
+                  updatePref({ budgetEnabled: true });
+                  setBudgetValue(String(user?.monthlyBudget || ''));
+                  setShowBudgetEdit(true);
+                }
+              }} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                <Wallet size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">{prefs.budgetEnabled ? 'Disable' : 'Enable'} Budget</span>
+              </DropdownMenuItem>
+              {prefs.budgetEnabled && (
+                <DropdownMenuItem onClick={() => { setBudgetValue(String(user?.monthlyBudget || '')); setShowBudgetEdit(true); }} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                  <Settings size={16} className="mr-2.5 text-muted-foreground" />
+                  <span className="text-sm font-medium">Edit Budget</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-xl py-2.5 px-3 cursor-pointer">
                 <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Deleted History</span>
@@ -165,7 +184,7 @@ const Index = () => {
 
       {/* Content */}
       <div className="max-w-lg mx-auto px-5 pt-4 pb-24" key={`${view}-${refresh}`}>
-        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} />}
+        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} showRecentActivity={prefs.showRecentActivity} budgetEnabled={prefs.budgetEnabled} />}
         {view === 'history' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} onBack={() => setView('home')} />}
         {view === 'filtered' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} filter={txFilter} onBack={() => setView('home')} />}
         {view === 'category' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} categoryFilter={categoryFilter} onBack={() => setView('home')} />}

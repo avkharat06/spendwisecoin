@@ -212,33 +212,34 @@ export function getAllCategories(): Category[] {
   return [...DEFAULT_CATEGORIES, ...getCustomCategories()];
 }
 
-// Seed sample data for testing
-export function seedSampleData() {
+// Preferences
+const PREFS_KEY = 'spendwise_prefs';
+
+export interface UserPrefs {
+  showRecentActivity: boolean;
+  budgetEnabled: boolean;
+}
+
+export function getPrefs(): UserPrefs {
+  const email = localStorage.getItem(ACTIVE_USER_KEY);
+  if (!email) return { showRecentActivity: true, budgetEnabled: true };
+  const raw = localStorage.getItem(`${PREFS_KEY}_${email}`);
+  return raw ? JSON.parse(raw) : { showRecentActivity: true, budgetEnabled: true };
+}
+
+export function setPrefs(prefs: Partial<UserPrefs>) {
   const email = localStorage.getItem(ACTIVE_USER_KEY);
   if (!email) return;
-  const existing = getTransactions();
-  if (existing.length > 0) return; // Don't overwrite
+  const current = getPrefs();
+  localStorage.setItem(`${PREFS_KEY}_${email}`, JSON.stringify({ ...current, ...prefs }));
+}
 
-  const now = new Date();
-  const today = now.toISOString().split('T')[0];
-  const yesterday = new Date(now.getTime() - 86400000).toISOString().split('T')[0];
-  const twoDaysAgo = new Date(now.getTime() - 2 * 86400000).toISOString().split('T')[0];
-  const threeDaysAgo = new Date(now.getTime() - 3 * 86400000).toISOString().split('T')[0];
-
-  const samples: Transaction[] = [
-    { id: crypto.randomUUID(), amount: 350, type: 'expense', category: 'Food', categoryEmoji: '🍔', categoryColor: '#F59E0B', merchant: 'Swiggy Order', date: today, timestamp: now.getTime() - 3600000 },
-    { id: crypto.randomUUID(), amount: 45000, type: 'income', category: 'Salary', categoryEmoji: '💰', categoryColor: '#10B981', merchant: 'Monthly Salary', date: today, timestamp: now.getTime() - 7200000 },
-    { id: crypto.randomUUID(), amount: 120, type: 'expense', category: 'Transport', categoryEmoji: '🚗', categoryColor: '#3B82F6', merchant: 'Uber Ride', date: today, timestamp: now.getTime() - 10800000 },
-    { id: crypto.randomUUID(), amount: 2500, type: 'expense', category: 'Shopping', categoryEmoji: '🛍️', categoryColor: '#EC4899', merchant: 'Amazon', date: yesterday, timestamp: now.getTime() - 86400000 },
-    { id: crypto.randomUUID(), amount: 799, type: 'expense', category: 'Entertainment', categoryEmoji: '🎮', categoryColor: '#8B5CF6', merchant: 'Netflix', date: yesterday, timestamp: now.getTime() - 90000000 },
-    { id: crypto.randomUUID(), amount: 1500, type: 'expense', category: 'Bills', categoryEmoji: '📱', categoryColor: '#EF4444', merchant: 'Jio Recharge', date: yesterday, timestamp: now.getTime() - 100000000 },
-    { id: crypto.randomUUID(), amount: 5000, type: 'income', category: 'Freelance', categoryEmoji: '💻', categoryColor: '#06B6D4', merchant: 'Client Payment', date: twoDaysAgo, timestamp: now.getTime() - 172800000 },
-    { id: crypto.randomUUID(), amount: 450, type: 'expense', category: 'Health', categoryEmoji: '💊', categoryColor: '#10B981', merchant: 'Apollo Pharmacy', date: twoDaysAgo, timestamp: now.getTime() - 180000000 },
-    { id: crypto.randomUUID(), amount: 200, type: 'expense', category: 'Food', categoryEmoji: '🍔', categoryColor: '#F59E0B', merchant: 'Chai Point', date: threeDaysAgo, timestamp: now.getTime() - 259200000 },
-    { id: crypto.randomUUID(), amount: 10000, type: 'income', category: 'Investment', categoryEmoji: '📈', categoryColor: '#F97316', merchant: 'Dividend', date: threeDaysAgo, timestamp: now.getTime() - 270000000 },
-    { id: crypto.randomUUID(), amount: 180, type: 'expense', category: 'Transport', categoryEmoji: '🚗', categoryColor: '#3B82F6', merchant: 'Metro Card', date: threeDaysAgo, timestamp: now.getTime() - 280000000 },
-    { id: crypto.randomUUID(), amount: 3200, type: 'expense', category: 'Shopping', categoryEmoji: '🛍️', categoryColor: '#EC4899', merchant: 'Myntra', date: threeDaysAgo, timestamp: now.getTime() - 290000000 },
-  ];
-
-  localStorage.setItem(txKey(email), JSON.stringify(samples));
+export function validatePassword(password: string): { valid: boolean; error?: string } {
+  const letters = (password.match(/[a-zA-Z]/g) || []).length;
+  const numbers = (password.match(/[0-9]/g) || []).length;
+  const specials = (password.match(/[^a-zA-Z0-9]/g) || []).length;
+  if (letters < 3) return { valid: false, error: 'Password must contain at least 3 letters' };
+  if (numbers < 3) return { valid: false, error: 'Password must contain at least 3 numbers' };
+  if (specials < 1) return { valid: false, error: 'Password must contain at least 1 special character' };
+  return { valid: true };
 }
