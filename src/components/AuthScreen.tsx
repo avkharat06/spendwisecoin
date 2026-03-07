@@ -54,7 +54,6 @@ const AuthScreen = ({ onAuth }: AuthScreenProps) => {
     setName('');
     setEmail('');
     setPassword('');
-    setBudget('');
   };
 
   return (
