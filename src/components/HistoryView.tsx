@@ -87,7 +87,7 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
   const handleDelete = () => {
     const count = selected.size;
     const deleted = deleteTransactions(Array.from(selected));
-    setSelected(new Set());
+    exitSelectionMode();
     onRefresh();
     toast({
       title: `Deleted ${count} transaction(s)`,
@@ -151,14 +151,16 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
         )}
         <h2 className="text-2xl font-black text-foreground flex-1">{title}</h2>
 
-        {/* Select All / Deselect */}
-        <button
-          onClick={allSelected ? deselectAll : selectAll}
-          className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all"
-          title={allSelected ? 'Deselect all' : 'Select all'}
-        >
-          {allSelected ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-muted-foreground" />}
-        </button>
+        {/* Select All / Deselect - only in selection mode */}
+        {selectionMode && (
+          <button
+            onClick={allSelected ? deselectAll : selectAll}
+            className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all"
+            title={allSelected ? 'Deselect all' : 'Select all'}
+          >
+            {allSelected ? <CheckSquare size={18} className="text-primary" /> : <Square size={18} className="text-muted-foreground" />}
+          </button>
+        )}
 
         {/* Month Filter */}
         <DropdownMenu>
@@ -216,15 +218,37 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
           <div className="space-y-2">
             {txs.map(tx => {
               const isSelected = selected.has(tx.id);
+              const handlePointerDown = () => {
+                longPressTriggered.current = false;
+                longPressTimer.current = setTimeout(() => {
+                  longPressTriggered.current = true;
+                  if (!selectionMode) {
+                    setSelectionMode(true);
+                    setSelected(new Set([tx.id]));
+                  }
+                }, 500);
+              };
+              const handlePointerUp = () => {
+                if (longPressTimer.current) clearTimeout(longPressTimer.current);
+                if (longPressTriggered.current) return;
+                if (selectionMode) toggle(tx.id);
+              };
+              const handlePointerLeave = () => {
+                if (longPressTimer.current) clearTimeout(longPressTimer.current);
+              };
               return (
                 <SwipeableTransaction key={tx.id} onDelete={() => handleSingleDelete(tx.id)}>
                   <div
-                    onClick={() => toggle(tx.id)}
-                    className={`card-item flex items-center gap-3 cursor-pointer transition-all ${isSelected ? 'border-primary/50' : ''}`}
+                    onPointerDown={handlePointerDown}
+                    onPointerUp={handlePointerUp}
+                    onPointerLeave={handlePointerLeave}
+                    className={`card-item flex items-center gap-3 cursor-pointer transition-all select-none ${isSelected ? 'border-primary/50' : ''}`}
                   >
-                    <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
-                      {isSelected && <div className="w-2 h-2 rounded-sm bg-primary-foreground" />}
-                    </div>
+                    {selectionMode && (
+                      <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
+                        {isSelected && <div className="w-2 h-2 rounded-sm bg-primary-foreground" />}
+                      </div>
+                    )}
                     <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg" style={{ backgroundColor: tx.categoryColor + '20' }}>
                       {tx.categoryEmoji}
                     </div>
