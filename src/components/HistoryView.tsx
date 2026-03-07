@@ -31,7 +31,16 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
     return filtered;
   }, [allTransactions, filter, categoryFilter, selectedMonth]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selectionMode, setSelectionMode] = useState(false);
   const { toast } = useToast();
+  const currency = getCurrency();
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
+
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelected(new Set());
+  }, []);
   const currency = getCurrency();
 
   // Get available months
