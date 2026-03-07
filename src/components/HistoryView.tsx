@@ -200,8 +200,8 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={deselectAll} className="p-2.5 rounded-2xl bg-secondary active:scale-95 transition-all">
-              <Square size={16} className="text-muted-foreground" />
+            <button onClick={exitSelectionMode} className="p-2.5 rounded-2xl bg-secondary active:scale-95 transition-all">
+              <X size={16} className="text-muted-foreground" />
             </button>
             <button onClick={handleDelete} className="p-3 rounded-2xl bg-destructive/20 active:scale-95 transition-all">
               <Trash2 size={18} className="text-destructive" />
