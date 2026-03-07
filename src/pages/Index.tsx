@@ -143,10 +143,28 @@ const Index = () => {
                 <DollarSign size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Currency: {currency}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setBudgetValue(String(user?.monthlyBudget || '')); setShowBudgetEdit(true); }} className="rounded-xl py-2.5 px-3 cursor-pointer">
-                <Wallet size={16} className="mr-2.5 text-muted-foreground" />
-                <span className="text-sm font-medium">Edit Budget</span>
+              <DropdownMenuItem onClick={() => updatePref({ showRecentActivity: !prefs.showRecentActivity })} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                {prefs.showRecentActivity ? <EyeOff size={16} className="mr-2.5 text-muted-foreground" /> : <Eye size={16} className="mr-2.5 text-muted-foreground" />}
+                <span className="text-sm font-medium">{prefs.showRecentActivity ? 'Hide' : 'Show'} Recent Activity</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (prefs.budgetEnabled) {
+                  updatePref({ budgetEnabled: false });
+                } else {
+                  updatePref({ budgetEnabled: true });
+                  setBudgetValue(String(user?.monthlyBudget || ''));
+                  setShowBudgetEdit(true);
+                }
+              }} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                <Wallet size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">{prefs.budgetEnabled ? 'Disable' : 'Enable'} Budget</span>
+              </DropdownMenuItem>
+              {prefs.budgetEnabled && (
+                <DropdownMenuItem onClick={() => { setBudgetValue(String(user?.monthlyBudget || '')); setShowBudgetEdit(true); }} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                  <Settings size={16} className="mr-2.5 text-muted-foreground" />
+                  <span className="text-sm font-medium">Edit Budget</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-xl py-2.5 px-3 cursor-pointer">
                 <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Deleted History</span>
@@ -166,7 +184,7 @@ const Index = () => {
 
       {/* Content */}
       <div className="max-w-lg mx-auto px-5 pt-4 pb-24" key={`${view}-${refresh}`}>
-        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} />}
+        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} showRecentActivity={prefs.showRecentActivity} budgetEnabled={prefs.budgetEnabled} />}
         {view === 'history' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} onBack={() => setView('home')} />}
         {view === 'filtered' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} filter={txFilter} onBack={() => setView('home')} />}
         {view === 'category' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} categoryFilter={categoryFilter} onBack={() => setView('home')} />}
