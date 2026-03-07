@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { getTransactions, deleteTransactions, restoreTransactions, Transaction, getCurrency } from '@/lib/auth';
 import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
