@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { getActiveUser, signOut, getCurrency, setCurrency as setCurrencyPref, updateBudget, getPrefs, setPrefs } from '@/lib/auth';
 import AuthScreen from '@/components/AuthScreen';
 import Dashboard from '@/components/Dashboard';
