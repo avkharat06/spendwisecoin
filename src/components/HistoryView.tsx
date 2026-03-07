@@ -41,7 +41,6 @@ const HistoryView = ({ refresh, onRefresh, filter, categoryFilter, onBack }: His
     setSelectionMode(false);
     setSelected(new Set());
   }, []);
-  const currency = getCurrency();
 
   // Get available months
   const availableMonths = useMemo(() => {
