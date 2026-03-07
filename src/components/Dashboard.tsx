@@ -5,9 +5,11 @@ import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
 interface DashboardProps {
   onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
   onCategoryView?: (category: string) => void;
+  showRecentActivity?: boolean;
+  budgetEnabled?: boolean;
 }
 
-const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
+const Dashboard = ({ onFilterView, onCategoryView, showRecentActivity = true, budgetEnabled = true }: DashboardProps) => {
   const user = getActiveUser();
   const transactions = getTransactions();
   const currency = getCurrency();
@@ -89,7 +91,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         </div>
 
         {/* Budget Bar */}
-        {user?.monthlyBudget && user.monthlyBudget > 0 && (
+        {budgetEnabled && user?.monthlyBudget && user.monthlyBudget > 0 && (
           <div className="mt-6">
             <div className="flex justify-between text-xs mb-2">
               <span className="text-muted-foreground font-medium">Budget Used</span>
@@ -111,7 +113,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
       </div>
 
       {/* Recent Activity */}
-      {recentTx.length > 0 && (
+      {showRecentActivity && recentTx.length > 0 && (
         <div>
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-3">Recent Activity</h3>
           <div className="space-y-2">
