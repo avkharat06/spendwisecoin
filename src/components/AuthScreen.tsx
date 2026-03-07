@@ -12,7 +12,7 @@ const AuthScreen = ({ onAuth }: AuthScreenProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [budget, setBudget] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [shake, setShake] = useState(false);
   const { toast } = useToast();
