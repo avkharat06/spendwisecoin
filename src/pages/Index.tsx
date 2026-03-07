@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react';
-import { getActiveUser, signOut, getCurrency, setCurrency as setCurrencyPref, updateBudget, getPrefs, setPrefs } from '@/lib/auth';
+import { getActiveUser, signOut, getCurrency, getPrefs } from '@/lib/auth';
 import AuthScreen from '@/components/AuthScreen';
 import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
-import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home, Trash2, Wallet, MessageSquare, X, Send, Eye, EyeOff, Settings } from 'lucide-react';
+import SettingsView from '@/components/SettingsView';
+import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -19,7 +20,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category';
+type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings';
 
 const Index = () => {
   const [authed, setAuthed] = useState(!!getActiveUser());
@@ -29,35 +30,18 @@ const Index = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [txFilter, setTxFilter] = useState<'expense' | 'income' | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
-  const [currency, setCurrencyState] = useState(getCurrency());
-  const [showBudgetEdit, setShowBudgetEdit] = useState(false);
-  const [budgetValue, setBudgetValue] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const { toast } = useToast();
 
   const triggerRefresh = useCallback(() => setRefresh(r => r + 1), []);
   const user = getActiveUser();
-
-  const [prefs, setPrefsState] = useState(getPrefs());
-
-  const updatePref = (p: Partial<typeof prefs>) => {
-    const updated = { ...prefs, ...p };
-    setPrefs(p);
-    setPrefsState(updated);
-    triggerRefresh();
-  };
+  const currency = getCurrency();
+  const prefs = getPrefs();
 
   const handleLogout = () => {
     signOut();
     setAuthed(false);
-  };
-
-  const toggleCurrency = () => {
-    const next = currency === '₹' ? '$' : '₹';
-    setCurrencyPref(next);
-    setCurrencyState(next);
-    triggerRefresh();
   };
 
   const handleFilterView = (filter: 'expense' | 'income' | 'all') => {
@@ -74,24 +58,11 @@ const Index = () => {
     setView('category');
   };
 
-  const handleBudgetSave = () => {
-    const val = parseFloat(budgetValue);
-    if (isNaN(val) || val < 0) {
-      toast({ title: 'Enter a valid budget amount' });
-      return;
-    }
-    updateBudget(val);
-    triggerRefresh();
-    setShowBudgetEdit(false);
-    toast({ title: 'Budget updated!' });
-  };
-
   const handleFeedbackSubmit = () => {
     if (!feedbackText.trim()) {
       toast({ title: 'Please enter your feedback' });
       return;
     }
-    // Store feedback locally
     const feedbacks = JSON.parse(localStorage.getItem('spendwise_feedbacks') || '[]');
     feedbacks.push({ text: feedbackText.trim(), date: new Date().toISOString(), user: user?.email });
     localStorage.setItem('spendwise_feedbacks', JSON.stringify(feedbacks));
@@ -139,32 +110,10 @@ const Index = () => {
                 <Lightbulb size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Insights</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={toggleCurrency} className="rounded-xl py-2.5 px-3 cursor-pointer">
-                <DollarSign size={16} className="mr-2.5 text-muted-foreground" />
-                <span className="text-sm font-medium">Currency: {currency}</span>
+              <DropdownMenuItem onClick={() => setView('settings')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+                <Settings size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => updatePref({ showRecentActivity: !prefs.showRecentActivity })} className="rounded-xl py-2.5 px-3 cursor-pointer">
-                {prefs.showRecentActivity ? <EyeOff size={16} className="mr-2.5 text-muted-foreground" /> : <Eye size={16} className="mr-2.5 text-muted-foreground" />}
-                <span className="text-sm font-medium">{prefs.showRecentActivity ? 'Hide' : 'Show'} Recent Activity</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                if (prefs.budgetEnabled) {
-                  updatePref({ budgetEnabled: false });
-                } else {
-                  updatePref({ budgetEnabled: true });
-                  setBudgetValue(String(user?.monthlyBudget || ''));
-                  setShowBudgetEdit(true);
-                }
-              }} className="rounded-xl py-2.5 px-3 cursor-pointer">
-                <Wallet size={16} className="mr-2.5 text-muted-foreground" />
-                <span className="text-sm font-medium">{prefs.budgetEnabled ? 'Disable' : 'Enable'} Budget</span>
-              </DropdownMenuItem>
-              {prefs.budgetEnabled && (
-                <DropdownMenuItem onClick={() => { setBudgetValue(String(user?.monthlyBudget || '')); setShowBudgetEdit(true); }} className="rounded-xl py-2.5 px-3 cursor-pointer">
-                  <Settings size={16} className="mr-2.5 text-muted-foreground" />
-                  <span className="text-sm font-medium">Edit Budget</span>
-                </DropdownMenuItem>
-              )}
               <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-xl py-2.5 px-3 cursor-pointer">
                 <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Deleted History</span>
@@ -190,6 +139,7 @@ const Index = () => {
         {view === 'category' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} categoryFilter={categoryFilter} onBack={() => setView('home')} />}
         {view === 'insights' && <InsightsView />}
         {view === 'deleted' && <DeletedHistoryView refresh={refresh} onRefresh={triggerRefresh} onBack={() => setView('home')} />}
+        {view === 'settings' && <SettingsView onBack={() => setView('home')} onRefresh={triggerRefresh} />}
       </div>
 
       {/* FAB */}
@@ -212,32 +162,6 @@ const Index = () => {
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
             <AlertDialogAction className="rounded-2xl bg-destructive hover:bg-destructive/90" onClick={handleLogout}>Sign Out</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Budget Edit Dialog */}
-      <AlertDialog open={showBudgetEdit} onOpenChange={setShowBudgetEdit}>
-        <AlertDialogContent className="rounded-3xl border-border/50 bg-card">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Edit Monthly Budget</AlertDialogTitle>
-            <AlertDialogDescription>Set your monthly spending limit to track your expenses.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-2">
-            <div className="flex items-center gap-2 rounded-2xl bg-secondary px-4 py-3">
-              <span className="text-lg font-bold text-muted-foreground">{currency}</span>
-              <input
-                type="number"
-                value={budgetValue}
-                onChange={e => setBudgetValue(e.target.value)}
-                placeholder="Enter budget amount"
-                className="flex-1 bg-transparent text-lg font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
-              />
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="rounded-2xl" onClick={handleBudgetSave}>Save</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
