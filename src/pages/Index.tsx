@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
-import { getActiveUser, signOut, seedSampleData, getCurrency, setCurrency as setCurrencyPref, updateBudget } from '@/lib/auth';
+import { getActiveUser, signOut, getCurrency, setCurrency as setCurrencyPref, updateBudget, getPrefs, setPrefs } from '@/lib/auth';
 import AuthScreen from '@/components/AuthScreen';
 import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
-import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home, Trash2, Wallet, MessageSquare, X, Send } from 'lucide-react';
+import { Plus, Clock, Lightbulb, LogOut, DollarSign, Home, Trash2, Wallet, MessageSquare, X, Send, Eye, EyeOff, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -39,13 +39,14 @@ const Index = () => {
   const triggerRefresh = useCallback(() => setRefresh(r => r + 1), []);
   const user = getActiveUser();
 
-  // Seed sample data on first login
-  useEffect(() => {
-    if (authed) {
-      seedSampleData();
-      triggerRefresh();
-    }
-  }, [authed]);
+  const [prefs, setPrefsState] = useState(getPrefs());
+
+  const updatePref = (p: Partial<typeof prefs>) => {
+    const updated = { ...prefs, ...p };
+    setPrefs(p);
+    setPrefsState(updated);
+    triggerRefresh();
+  };
 
   const handleLogout = () => {
     signOut();
