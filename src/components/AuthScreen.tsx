@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signIn, signUp } from '@/lib/auth';
+import { signIn, signUp, validatePassword } from '@/lib/auth';
 import { Eye, EyeOff, Wallet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,7 +25,13 @@ const AuthScreen = ({ onAuth }: AuthScreenProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === 'signup') {
-      const result = signUp(name, email, password, Number(budget) || 5000);
+      const pwCheck = validatePassword(password);
+      if (!pwCheck.valid) {
+        triggerShake();
+        toast({ title: 'Weak Password', description: pwCheck.error, variant: 'destructive' });
+        return;
+      }
+      const result = signUp(name, email, password, 0);
       if (result.success) {
         toast({ title: 'Welcome to SpendWise!', description: 'Your account has been created.' });
         onAuth();
@@ -121,13 +127,9 @@ const AuthScreen = ({ onAuth }: AuthScreenProps) => {
             </button>
           </div>
           {mode === 'signup' && (
-            <input
-              type="number"
-              placeholder="Monthly Budget (₹)"
-              value={budget}
-              onChange={e => setBudget(e.target.value)}
-              className="w-full px-5 py-4 rounded-3xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm"
-            />
+            <p className="text-xs text-muted-foreground text-center">
+              Password: min 3 letters, 3 numbers, 1 special character
+            </p>
           )}
           <button
             type="submit"
