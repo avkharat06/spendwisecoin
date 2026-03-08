@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import spendwiseLogo from '@/assets/spendwise-logo.png';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -51,6 +52,7 @@ const AuthScreen = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-5">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
+          <img src={spendwiseLogo} alt="SpendWise" className="w-16 h-16 mx-auto mb-3 rounded-2xl" />
           <h1 className="font-display text-3xl font-bold text-foreground">SpendWise</h1>
           <p className="text-sm text-muted-foreground mt-1">Track · Save · Grow</p>
         </div>
