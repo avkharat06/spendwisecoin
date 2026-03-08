@@ -354,7 +354,8 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
             })}
           </div>
         </div>
-      ))}
+        );
+      })}
 
       {transactions.length === 0 && (
         <div className="text-center py-16">
