@@ -300,7 +300,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{tx.merchant}</p>
-                      <p className="text-xs text-muted-foreground">{tx.category}</p>
+                      <p className="text-xs text-muted-foreground">{tx.category} · {tx.payment_method === 'upi' ? '📱' : '💵'}</p>
                     </div>
                     <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
                       {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
