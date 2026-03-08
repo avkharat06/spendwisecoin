@@ -103,7 +103,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
       {/* Monthly Balance Card */}
       <div className="rounded-2xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Monthly Balance</p>
-        <p className={`text-3xl font-display font-bold ${(stats.monthIncome - stats.monthSpent) >= 0 ? 'text-primary' : 'text-destructive'}`}>
+        <p className={`text-3xl font-display font-bold ${(stats.monthIncome - stats.monthSpent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
           {(stats.monthIncome - stats.monthSpent) >= 0 ? '+' : '-'}{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}
         </p>
 
@@ -123,10 +123,10 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
             className="rounded-xl bg-secondary/80 px-3 py-3 text-center active:scale-95 transition-all"
           >
             <div className="flex items-center justify-center gap-1 mb-1">
-              <span className="text-primary text-[10px]">↗</span>
-              <span className="text-[9px] font-bold text-primary uppercase tracking-wider">Income</span>
+              <span className="text-green-400 text-[10px]">↗</span>
+              <span className="text-[9px] font-bold text-green-400 uppercase tracking-wider">Income</span>
             </div>
-            <p className="text-sm font-display font-bold text-primary">{fmt(stats.monthIncome)}</p>
+            <p className="text-sm font-display font-bold text-green-400">{fmt(stats.monthIncome)}</p>
           </button>
           <button
             onClick={() => onFilterView?.('all')}
@@ -262,7 +262,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
                     {tx.category} · {new Date(tx.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-primary' : 'text-destructive'}`}>
+                <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
                   {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
                 </p>
               </div>
