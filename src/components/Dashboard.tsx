@@ -152,9 +152,28 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
 
       {/* Monthly Balance Card */}
       <div className="rounded-2xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Monthly Balance</p>
-        <p className={`text-3xl font-display font-bold ${(stats.monthIncome - stats.monthSpent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
-          {(stats.monthIncome - stats.monthSpent) >= 0 ? '+' : '-'}{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+            {balancePeriod === 'daily' ? 'Daily' : balancePeriod === 'weekly' ? 'Weekly' : 'Monthly'} Balance
+          </p>
+          <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
+            {(['daily', 'weekly', 'monthly'] as BalancePeriod[]).map(p => (
+              <button
+                key={p}
+                onClick={() => setBalancePeriod(p)}
+                className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${
+                  balancePeriod === p
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {p === 'daily' ? 'Day' : p === 'weekly' ? 'Week' : 'Month'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className={`text-3xl font-display font-bold ${(balanceStats.income - balanceStats.spent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
+          {(balanceStats.income - balanceStats.spent) >= 0 ? '+' : '-'}{fmt(Math.abs(balanceStats.income - balanceStats.spent))}
         </p>
 
         <div className="grid grid-cols-3 gap-2 mt-4">
@@ -166,7 +185,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               <span className="text-destructive text-[10px]">↘</span>
               <span className="text-[9px] font-bold text-destructive uppercase tracking-wider">Spent</span>
             </div>
-            <p className="text-sm font-display font-bold text-destructive">{fmt(stats.monthSpent)}</p>
+            <p className="text-sm font-display font-bold text-destructive">{fmt(balanceStats.spent)}</p>
           </button>
           <button
             onClick={() => onFilterView?.('income')}
@@ -176,7 +195,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               <span className="text-green-400 text-[10px]">↗</span>
               <span className="text-[9px] font-bold text-green-400 uppercase tracking-wider">Income</span>
             </div>
-            <p className="text-sm font-display font-bold text-green-400">{fmt(stats.monthIncome)}</p>
+            <p className="text-sm font-display font-bold text-green-400">{fmt(balanceStats.income)}</p>
           </button>
           <button
             onClick={() => onFilterView?.('all')}
@@ -186,7 +205,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               <span className="text-cyan-400 text-[10px]">—</span>
               <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">Net</span>
             </div>
-            <p className="text-sm font-display font-bold text-cyan-400">{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}</p>
+            <p className="text-sm font-display font-bold text-cyan-400">{fmt(Math.abs(balanceStats.income - balanceStats.spent))}</p>
           </button>
         </div>
 
