@@ -193,7 +193,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
           {topCategory && (
             <div className="mt-4 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
               <p className="text-xs text-primary font-medium">
-                💡 You spent the most on <strong>{topCategory.name}</strong> this month — {fmt(topCategory.amount)}
+                💡 You spent the most on <strong>{topCategory.name}</strong> {breakdownPeriod === 'daily' ? 'today' : breakdownPeriod === 'weekly' ? 'this week' : breakdownPeriod === 'yearly' ? 'this year' : 'this month'} — {fmt(topCategory.amount)}
               </p>
             </div>
           )}
