@@ -16,12 +16,12 @@ interface HistoryViewProps {
   onBack?: () => void;
 }
 
-const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
+const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: HistoryViewProps) => {
   const { data: allTransactions = [] } = useTransactions();
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [paymentFilter, setPaymentFilter] = useState<'all' | 'upi' | 'cash'>('all');
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'upi' | 'cash'>(initialPaymentFilter || 'all');
   const softDelete = useSoftDeleteTransactions();
   const restore = useRestoreTransactions();
   const [editingTx, setEditingTx] = useState<typeof allTransactions[0] | null>(null);
