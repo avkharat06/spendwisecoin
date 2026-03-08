@@ -26,6 +26,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const softDelete = useSoftDeleteTransactions();
   const restore = useRestoreTransactions();
   const [editingTx, setEditingTx] = useState<typeof allTransactions[0] | null>(null);
+  const [viewingTx, setViewingTx] = useState<typeof allTransactions[0] | null>(null);
 
   const transactions = useMemo(() => {
     let filtered = allTransactions;
