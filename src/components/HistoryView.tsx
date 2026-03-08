@@ -331,6 +331,13 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         </div>
       )}
 
+      {viewingTx && (
+        <TransactionDetailModal
+          transaction={viewingTx}
+          onClose={() => setViewingTx(null)}
+          onEdit={() => { setEditingTx(viewingTx); setViewingTx(null); }}
+        />
+      )}
       {editingTx && <EditTransactionModal transaction={editingTx} onClose={() => setEditingTx(null)} />}
     </div>
   );
