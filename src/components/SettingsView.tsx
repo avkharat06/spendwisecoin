@@ -74,6 +74,50 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
     await updateProfile.mutateAsync({ [key]: value });
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: 'Please upload a JPG, PNG, or WebP image', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'Image must be under 2MB', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${ext}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = `${publicUrl}?t=${Date.now()}`;
+      await updateProfile.mutateAsync({ avatar_url: avatarUrl });
+      toast({ title: 'Profile photo updated! 📸' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const getInitials = () => {
+    if (!profile?.display_name) return '?';
+    return profile.display_name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   if (isLoading) {
     return (
       <div className="animate-in pb-4">
