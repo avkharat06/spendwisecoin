@@ -191,8 +191,8 @@ const Index = () => {
 
       {/* Content */}
       <main className="max-w-md mx-auto px-5 py-5 pb-24 space-y-6 animate-fade-in">
-        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} />}
-        {view === 'history' && <HistoryView onBack={() => setView('home')} />}
+        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} onPaymentMethodView={handlePaymentMethodView} />}
+        {view === 'history' && <HistoryView onBack={() => { setPaymentMethodFilter(undefined); setView('home'); }} initialPaymentFilter={paymentMethodFilter} />}
         {view === 'filtered' && <HistoryView filter={txFilter} onBack={() => setView('home')} />}
         {view === 'category' && <HistoryView categoryFilter={categoryFilter} onBack={() => setView('home')} />}
         {view === 'insights' && <InsightsView />}
