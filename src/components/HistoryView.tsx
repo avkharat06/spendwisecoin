@@ -20,6 +20,7 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'upi' | 'cash'>('all');
   const softDelete = useSoftDeleteTransactions();
   const restore = useRestoreTransactions();
   const [editingTx, setEditingTx] = useState<typeof allTransactions[0] | null>(null);
