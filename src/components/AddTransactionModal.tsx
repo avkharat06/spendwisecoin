@@ -19,6 +19,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [selectedCat, setSelectedCat] = useState(0);
   const [merchant, setMerchant] = useState('');
   const [date, setDate] = useState<Date>(new Date());
+  const [quantity, setQuantity] = useState('1');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const { toast } = useToast();
   const { data: profile } = useProfile();
@@ -97,14 +98,29 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
             />
           </div>
 
-          {/* Merchant */}
-          <input
-            type="text"
-            value={merchant}
-            onChange={e => setMerchant(e.target.value)}
-            placeholder="Merchant / Note"
-            className="w-full px-5 py-3.5 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm mb-4"
-          />
+          {/* Quantity + Merchant */}
+          <div className="flex gap-3 mb-4">
+            <div className="w-24">
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Qty</label>
+              <input
+                type="number"
+                value={quantity}
+                onChange={e => setQuantity(e.target.value)}
+                min="1"
+                className="w-full px-4 py-3.5 rounded-xl bg-secondary text-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm text-center font-display font-bold"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Merchant / Note</label>
+              <input
+                type="text"
+                value={merchant}
+                onChange={e => setMerchant(e.target.value)}
+                placeholder="Merchant / Note"
+                className="w-full px-5 py-3.5 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm"
+              />
+            </div>
+          </div>
 
           {/* Date Picker */}
           <Popover>
