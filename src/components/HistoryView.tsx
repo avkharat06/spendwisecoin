@@ -261,11 +261,41 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         </div>
       )}
 
-      {grouped.map(([date, txs]) => (
+      {grouped.map(([date, txs]) => {
+        const dateIds = txs.map(tx => tx.id);
+        const allDateSelected = dateIds.length > 0 && dateIds.every(id => selected.has(id));
+        const dateExpense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+        const dateIncome = txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+        const toggleDate = () => {
+          setSelected(prev => {
+            const next = new Set(prev);
+            if (allDateSelected) dateIds.forEach(id => next.delete(id));
+            else dateIds.forEach(id => next.add(id));
+            return next;
+          });
+        };
+        return (
         <div key={date} className="mb-4">
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-            {new Date(date + 'T00:00:00').toLocaleDateString(currency === '₹' ? 'en-IN' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              {selectionMode && (
+                <button onClick={toggleDate} className="active:scale-90 transition-all">
+                  <div className={`w-4.5 h-4.5 rounded-md border-2 flex items-center justify-center transition-all ${allDateSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
+                    {allDateSelected && <div className="w-1.5 h-1.5 rounded-sm bg-primary-foreground" />}
+                  </div>
+                </button>
+              )}
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {new Date(date + 'T00:00:00').toLocaleDateString(currency === '₹' ? 'en-IN' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
+              </p>
+            </div>
+            {selectionMode && (
+              <div className="flex items-center gap-2 text-[10px] font-display font-bold">
+                {dateExpense > 0 && <span className="text-destructive">-{currency}{dateExpense.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}</span>}
+                {dateIncome > 0 && <span className="text-green-400">+{currency}{dateIncome.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}</span>}
+              </div>
+            )}
+          </div>
           <div className="space-y-2">
             {txs.map(tx => {
               const isSelected = selected.has(tx.id);
