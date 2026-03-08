@@ -1,0 +1,150 @@
+import { useState } from 'react';
+import { X, CalendarIcon, Save } from 'lucide-react';
+import { format } from 'date-fns';
+import { useUpdateTransaction, useAllCategories, useProfile } from '@/lib/store';
+import { useToast } from '@/hooks/use-toast';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+interface Transaction {
+  id: string;
+  amount: number;
+  type: string;
+  category: string;
+  category_emoji: string;
+  category_color: string;
+  merchant: string;
+  date: string;
+  note: string | null;
+}
+
+interface EditTransactionModalProps {
+  transaction: Transaction;
+  onClose: () => void;
+}
+
+const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProps) => {
+  const [amount, setAmount] = useState(String(transaction.amount));
+  const [type, setType] = useState<'expense' | 'income'>(transaction.type as 'expense' | 'income');
+  const [merchant, setMerchant] = useState(transaction.merchant);
+  const [date, setDate] = useState<Date>(new Date(transaction.date + 'T00:00:00'));
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { toast } = useToast();
+  const { data: profile } = useProfile();
+  const currency = profile?.currency || '₹';
+  const updateTransaction = useUpdateTransaction();
+  const categories = useAllCategories();
+
+  const catIndex = categories.findIndex(c => c.name === transaction.category);
+  const [selectedCat, setSelectedCat] = useState(catIndex >= 0 ? catIndex : 0);
+
+  const handleSave = () => setShowConfirm(true);
+
+  const handleConfirm = async () => {
+    const amt = Number(amount);
+    if (!amt || amt <= 0) {
+      toast({ title: 'Enter a valid amount', variant: 'destructive' });
+      return;
+    }
+    const cat = categories[selectedCat];
+    try {
+      await updateTransaction.mutateAsync({
+        id: transaction.id,
+        amount: amt,
+        type,
+        category: cat.name,
+        category_emoji: cat.emoji,
+        category_color: cat.color,
+        merchant: merchant || cat.name,
+        date: format(date, 'yyyy-MM-dd'),
+      });
+      toast({ title: 'Transaction updated!' });
+      onClose();
+    } catch {
+      toast({ title: 'Error updating transaction', variant: 'destructive' });
+    }
+    setShowConfirm(false);
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60 backdrop-blur-sm" onClick={onClose}>
+        <div className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in" onClick={e => e.stopPropagation()}>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-display font-bold text-foreground">Edit Transaction</h2>
+            <button onClick={onClose} className="p-2 rounded-full bg-secondary active:scale-95 transition-all">
+              <X size={18} className="text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Type Toggle */}
+          <div className="flex rounded-xl bg-secondary p-1 mb-6">
+            <button onClick={() => setType('expense')} className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === 'expense' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}>
+              Expense
+            </button>
+            <button onClick={() => setType('income')} className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === 'income' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
+              Income
+            </button>
+          </div>
+
+          {/* Amount */}
+          <div className="text-center mb-6">
+            <span className="text-muted-foreground text-2xl font-display font-bold">{currency}</span>
+            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="text-5xl font-display font-bold text-foreground bg-transparent text-center w-48 outline-none placeholder:text-muted-foreground/30" />
+          </div>
+
+          {/* Merchant */}
+          <input type="text" value={merchant} onChange={e => setMerchant(e.target.value)} placeholder="Merchant / Note" className="w-full px-5 py-3.5 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm mb-4" />
+
+          {/* Date Picker */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn("w-full px-5 py-3.5 rounded-xl bg-secondary text-sm border border-border focus:border-primary transition-all text-left flex items-center gap-3 mb-4")}>
+                <CalendarIcon size={16} className="text-muted-foreground" />
+                {format(date, 'EEE, dd MMM yyyy')}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <Calendar mode="single" selected={date} onSelect={d => d && setDate(d)} initialFocus className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+
+          {/* Category Grid */}
+          <div className="grid grid-cols-5 gap-2 mb-6 max-h-40 overflow-y-auto">
+            {categories.map((cat, i) => (
+              <button key={cat.name} onClick={() => setSelectedCat(i)} className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 ${selectedCat === i ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'}`}>
+                <span className="text-xl">{cat.emoji}</span>
+                <span className="text-[9px] font-semibold text-muted-foreground truncate w-full text-center px-0.5">{cat.name}</span>
+              </button>
+            ))}
+          </div>
+
+          <button onClick={handleSave} disabled={updateTransaction.isPending} className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base active:scale-95 transition-all disabled:opacity-50" style={{ boxShadow: 'var(--shadow-glow)' }}>
+            <span className="flex items-center justify-center gap-2"><Save size={18} /> Save Changes</span>
+          </button>
+        </div>
+      </div>
+
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent className="rounded-2xl border-border/50 bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Confirm Changes</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to make these changes? This action will update the transaction.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction className="rounded-xl" onClick={handleConfirm}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
+
+export default EditTransactionModal;

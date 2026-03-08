@@ -63,7 +63,19 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
     await updateProfile.mutateAsync({ [key]: value });
   };
 
-  if (!profile) return null;
+  if (!profile) return (
+    <div className="animate-in pb-4">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={onBack} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
+          <ArrowLeft size={18} className="text-foreground" />
+        </button>
+        <h2 className="text-2xl font-display font-bold text-foreground">Settings</h2>
+      </div>
+      <div className="text-center py-16">
+        <p className="text-muted-foreground font-medium">Loading settings...</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="animate-in pb-4">

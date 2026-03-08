@@ -1,11 +1,13 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SwipeableTransaction from './SwipeableTransaction';
+import EditTransactionModal from './EditTransactionModal';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface HistoryViewProps {
   filter?: 'expense' | 'income' | 'all';
@@ -20,14 +22,13 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const softDelete = useSoftDeleteTransactions();
   const restore = useRestoreTransactions();
+  const [editingTx, setEditingTx] = useState<typeof allTransactions[0] | null>(null);
 
   const transactions = useMemo(() => {
     let filtered = allTransactions;
     if (filter && filter !== 'all') filtered = filtered.filter(tx => tx.type === filter);
     if (categoryFilter) filtered = filtered.filter(tx => tx.category === categoryFilter);
-    if (selectedMonth) {
-      filtered = filtered.filter(tx => tx.date.startsWith(selectedMonth));
-    }
+    if (selectedMonth) filtered = filtered.filter(tx => tx.date.startsWith(selectedMonth));
     return filtered;
   }, [allTransactions, filter, categoryFilter, selectedMonth]);
 
@@ -81,13 +82,8 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
     toast({
       title: `Deleted ${count} transaction(s)`,
       action: (
-        <button
-          onClick={async () => {
-            await restore.mutateAsync(ids);
-            toast({ title: `Restored ${count} transaction(s)` });
-          }}
-          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all"
-        >
+        <button onClick={async () => { await restore.mutateAsync(ids); toast({ title: `Restored ${count} transaction(s)` }); }}
+          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all">
           Undo
         </button>
       ),
@@ -100,18 +96,29 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
     toast({
       title: 'Transaction deleted',
       action: (
-        <button
-          onClick={async () => {
-            await restore.mutateAsync([id]);
-            toast({ title: 'Transaction restored' });
-          }}
-          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all"
-        >
+        <button onClick={async () => { await restore.mutateAsync([id]); toast({ title: 'Transaction restored' }); }}
+          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all">
           Undo
         </button>
       ),
     });
   };
+
+  // Pie chart data
+  const pieData = useMemo(() => {
+    const expenses = transactions.filter(t => t.type === 'expense');
+    const grouped: Record<string, { amount: number; emoji: string; color: string }> = {};
+    expenses.forEach(tx => {
+      if (!grouped[tx.category]) grouped[tx.category] = { amount: 0, emoji: tx.category_emoji, color: tx.category_color };
+      grouped[tx.category].amount += tx.amount;
+    });
+    return Object.entries(grouped)
+      .map(([name, d]) => ({ name, value: d.amount, color: d.color, emoji: d.emoji }))
+      .sort((a, b) => b.value - a.value);
+  }, [transactions]);
+
+  const totalExpense = pieData.reduce((s, d) => s + d.value, 0);
+  const topCategory = pieData[0];
 
   const grouped = useMemo(() => {
     const groups: Record<string, typeof transactions> = {};
@@ -162,6 +169,54 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
         </DropdownMenu>
       </div>
 
+      {/* Pie Chart Breakdown */}
+      {pieData.length > 0 && !categoryFilter && (
+        <div className="card-premium mb-4">
+          <h3 className="font-display font-semibold text-sm text-muted-foreground uppercase tracking-widest mb-3">Monthly Breakdown</h3>
+          <div className="flex items-center gap-4">
+            <div className="w-28 h-28 flex-shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={50} paddingAngle={2} strokeWidth={0}>
+                    {pieData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.[0]) return null;
+                      const d = payload[0].payload;
+                      return (
+                        <div className="bg-card border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
+                          <p className="font-semibold text-foreground">{d.emoji} {d.name}</p>
+                          <p className="text-muted-foreground">{fmt(d.value)}</p>
+                        </div>
+                      );
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex-1 space-y-2">
+              {pieData.slice(0, 5).map(d => (
+                <div key={d.name} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }} />
+                    <span className="text-foreground">{d.name}</span>
+                  </div>
+                  <span className="text-muted-foreground font-display font-semibold">{fmt(d.value)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {topCategory && (
+            <div className="mt-3 px-3 py-2 rounded-xl bg-primary/10 text-xs text-primary font-medium flex items-center gap-1.5">
+              💡 You spent the most on <strong>{topCategory.name}</strong> — {fmt(topCategory.value)}
+            </div>
+          )}
+        </div>
+      )}
+
       {selected.size > 0 && (
         <div className="sticky top-14 z-20 card-premium flex items-center justify-between mb-4 backdrop-blur-xl">
           <div>
@@ -193,10 +248,7 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
                 longPressTriggered.current = false;
                 longPressTimer.current = setTimeout(() => {
                   longPressTriggered.current = true;
-                  if (!selectionMode) {
-                    setSelectionMode(true);
-                    setSelected(new Set([tx.id]));
-                  }
+                  if (!selectionMode) { setSelectionMode(true); setSelected(new Set([tx.id])); }
                 }, 500);
               };
               const handlePointerUp = () => {
@@ -230,6 +282,14 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
                     <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-primary' : 'text-destructive'}`}>
                       {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
                     </p>
+                    {!selectionMode && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setEditingTx(tx); }}
+                        className="p-1.5 rounded-lg bg-secondary/80 hover:bg-secondary active:scale-95 transition-all ml-1"
+                      >
+                        <Pencil size={14} className="text-muted-foreground" />
+                      </button>
+                    )}
                   </div>
                 </SwipeableTransaction>
               );
@@ -244,6 +304,8 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
           <p className="text-muted-foreground font-medium">No {filter === 'expense' ? 'expenses' : filter === 'income' ? 'income' : 'transactions'} yet</p>
         </div>
       )}
+
+      {editingTx && <EditTransactionModal transaction={editingTx} onClose={() => setEditingTx(null)} />}
     </div>
   );
 };
