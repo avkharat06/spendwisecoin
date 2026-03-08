@@ -310,6 +310,8 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                     </p>
                     {!selectionMode && (
                       <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onPointerUp={e => e.stopPropagation()}
                         onClick={e => { e.stopPropagation(); setEditingTx(tx); }}
                         className="p-1.5 rounded-lg bg-secondary/80 hover:bg-secondary active:scale-95 transition-all ml-1"
                       >
