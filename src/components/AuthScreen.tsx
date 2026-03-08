@@ -52,8 +52,8 @@ const AuthScreen = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-5 relative overflow-hidden">
       {/* Subtle glow orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/4 -left-1/4 w-[60%] h-[60%] rounded-full opacity-40 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(24, 95%, 53%, 0.1), transparent 70%)' }} />
-        <div className="absolute -bottom-1/4 -right-1/4 w-[50%] h-[50%] rounded-full opacity-30 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(34, 90%, 55%, 0.08), transparent 70%)', animationDelay: '1.5s' }} />
+        <div className="absolute -top-1/4 -left-1/4 w-[60%] h-[60%] rounded-full opacity-40 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(263, 70%, 58%, 0.1), transparent 70%)' }} />
+        <div className="absolute -bottom-1/4 -right-1/4 w-[50%] h-[50%] rounded-full opacity-30 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(280, 65%, 55%, 0.08), transparent 70%)', animationDelay: '1.5s' }} />
       </div>
       <div className="w-full max-w-sm animate-fade-in relative z-10">
         <div className="text-center mb-8">
