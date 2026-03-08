@@ -34,6 +34,28 @@ const Index = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const { toast } = useToast();
 
+  // Handle mobile back button — navigate back to home instead of exiting
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      if (view !== 'home') {
+        setView('home');
+        window.history.pushState(null, '', window.location.href);
+      } else {
+        // Push state again to prevent exit
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    // Push an initial state so we have something to "go back" to
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [view]);
+
   const handleLogout = async () => {
     await signOut();
   };
