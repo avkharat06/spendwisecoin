@@ -262,7 +262,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
                     {tx.category} · {new Date(tx.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-primary' : 'text-destructive'}`}>
+                <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
                   {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
                 </p>
               </div>
