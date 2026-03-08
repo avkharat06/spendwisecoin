@@ -22,6 +22,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [quantity, setQuantity] = useState('1');
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cash'>('upi');
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const { toast } = useToast();
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
