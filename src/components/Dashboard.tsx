@@ -178,7 +178,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
         <div className="grid grid-cols-2 gap-2 mt-3">
           <div className="rounded-xl bg-secondary/60 px-3 py-2.5">
             <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-sm">📱</span>
+              <span className="text-sm">💳</span>
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">UPI</span>
             </div>
             <p className="text-xs font-display font-bold text-destructive">-{fmt(stats.monthUpiSpent)}</p>
