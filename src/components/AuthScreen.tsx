@@ -56,7 +56,7 @@ const AuthScreen = () => {
         <div className="absolute -bottom-1/4 -right-1/4 w-[50%] h-[50%] rounded-full opacity-20 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(0, 70%, 40%, 0.25), transparent 70%)', animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] rounded-full opacity-20 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(152, 60%, 40%, 0.25), transparent 70%)', animationDelay: '2s' }} />
       </div>
-      <div className="w-full max-w-sm animate-fade-in">
+      <div className="w-full max-w-sm animate-fade-in relative z-10">
         <div className="text-center mb-8">
           <img src={spendwiseLogo} alt="SpendWise" className="w-16 h-16 mx-auto mb-3 rounded-2xl" />
           <h1 className="font-display text-3xl font-bold text-foreground">SpendWise</h1>
