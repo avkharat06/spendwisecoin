@@ -166,6 +166,7 @@ export function useUpdateTransaction() {
       merchant?: string;
       date?: string;
       note?: string;
+      quantity?: number;
     }) => {
       const { error } = await supabase
         .from('transactions')
