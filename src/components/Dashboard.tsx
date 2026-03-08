@@ -346,8 +346,8 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
       {transactions.length === 0 && (
         <div className="text-center py-16">
           <p className="text-4xl mb-3">💸</p>
-          <p className="text-muted-foreground font-medium">No transactions yet</p>
-          <p className="text-muted-foreground text-sm mt-1">Tap + to add your first entry</p>
+          <p className="text-foreground font-display font-bold text-lg">No transactions yet</p>
+          <p className="text-muted-foreground text-sm mt-2">Click on the <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold align-middle mx-1">+</span> button to add your first expense</p>
         </div>
       )}
     </div>
