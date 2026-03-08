@@ -16,7 +16,7 @@ interface AddTransactionModalProps {
 const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'expense' | 'income'>('expense');
-  const [selectedCat, setSelectedCat] = useState(0);
+  const [selectedCatName, setSelectedCatName] = useState<string | null>(null);
   const [merchant, setMerchant] = useState('');
   const [date, setDate] = useState<Date>(new Date());
   const [quantity, setQuantity] = useState('1');
