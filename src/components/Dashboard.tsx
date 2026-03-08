@@ -101,14 +101,30 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
 
   return (
     <div className="animate-in space-y-5 pb-4">
-      {/* Greeting */}
-      <div>
-        <p className="text-muted-foreground text-sm">
-          Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},
-        </p>
-        <h2 className="text-2xl font-display font-bold text-foreground">
-          {profile?.display_name?.split(' ')[0] || 'User'}
-        </h2>
+      {/* Greeting + Balance Tabs */}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-muted-foreground text-sm">
+            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},
+          </p>
+          <h2 className="text-2xl font-display font-bold text-foreground">
+            {profile?.display_name?.split(' ')[0] || 'User'}
+          </h2>
+        </div>
+        <div className="flex gap-2 mt-1">
+          <div className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center">
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">📱 UPI</p>
+            <p className={`text-xs font-display font-bold ${(stats.monthUpiIncome - stats.monthUpiSpent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
+              {fmt(Math.abs(stats.monthUpiIncome - stats.monthUpiSpent))}
+            </p>
+          </div>
+          <div className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center">
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💵 Cash</p>
+            <p className={`text-xs font-display font-bold ${(stats.monthCashIncome - stats.monthCashSpent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
+              {fmt(Math.abs(stats.monthCashIncome - stats.monthCashSpent))}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Monthly Balance Card */}
