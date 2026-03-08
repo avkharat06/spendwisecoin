@@ -96,6 +96,11 @@ const Index = () => {
     navigateTo('category');
   };
 
+  const handlePaymentMethodView = (method: 'upi' | 'cash') => {
+    setPaymentMethodFilter(method);
+    navigateTo('history');
+  };
+
   const handleFeedbackSubmit = () => {
     if (!feedbackText.trim()) {
       toast({ title: 'Please enter your feedback' });
