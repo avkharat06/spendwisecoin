@@ -51,12 +51,12 @@ const Index = () => {
         window.history.pushState(null, '', window.location.href);
       } else {
         const now = Date.now();
-        if (now - lastBackPress < 2000) {
+        if (now - lastBackPressRef.current < 2000) {
           window.removeEventListener('popstate', handlePopState);
           window.history.back();
           return;
         }
-        setLastBackPress(now);
+        lastBackPressRef.current = now;
         toast({ title: 'Press back again to exit', duration: 2000 });
         window.history.pushState(null, '', window.location.href);
       }
