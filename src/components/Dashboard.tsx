@@ -103,10 +103,9 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
       {/* Spent Row */}
       <div>
         <p className="text-[10px] font-semibold text-destructive uppercase tracking-wider mb-2">Spent</p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {[
             { label: 'Today', value: stats.todaySpent },
-            { label: 'This Week', value: stats.weekSpent },
             { label: 'This Month', value: stats.monthSpent },
           ].map(item => (
             <button
