@@ -29,7 +29,8 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
     weekStart.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     weekStart.setHours(0, 0, 0, 0);
 
-    let todaySpent = 0, weekSpent = 0, monthSpent = 0, monthIncome = 0;
+    let todaySpent = 0, weekSpent = 0, monthSpent = 0;
+    let todayIncome = 0, weekIncome = 0, monthIncome = 0;
 
     transactions.forEach(tx => {
       const txDate = new Date(tx.date + 'T00:00:00');
@@ -38,12 +39,14 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         if (txDate >= weekStart) weekSpent += tx.amount;
         if (txDate >= monthStart) monthSpent += tx.amount;
       } else {
+        if (tx.date === today) todayIncome += tx.amount;
+        if (txDate >= weekStart) weekIncome += tx.amount;
         if (txDate >= monthStart) monthIncome += tx.amount;
       }
     });
 
     const budgetUsage = monthlyBudget > 0 ? (monthSpent / monthlyBudget) * 100 : 0;
-    return { todaySpent, weekSpent, monthSpent, monthIncome, budgetUsage };
+    return { todaySpent, weekSpent, monthSpent, todayIncome, weekIncome, monthIncome, budgetUsage };
   }, [transactions, monthlyBudget]);
 
   type BreakdownPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
