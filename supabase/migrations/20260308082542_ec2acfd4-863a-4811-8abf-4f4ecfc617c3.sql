@@ -1,0 +1,1 @@
+ALTER TABLE public.transactions ADD COLUMN payment_method text NOT NULL DEFAULT 'cash';
