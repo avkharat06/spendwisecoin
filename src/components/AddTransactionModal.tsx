@@ -22,6 +22,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [quantity, setQuantity] = useState('1');
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cash'>('upi');
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const { toast } = useToast();
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
@@ -63,7 +64,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
     <>
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60 backdrop-blur-sm" onClick={onClose}>
         <div
-          className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in"
+          className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in max-h-[90vh] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-6">
@@ -127,7 +128,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
           </div>
 
           {/* Date Picker */}
-          <Popover>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <button
                 className={cn(
@@ -143,7 +144,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(d) => d && setDate(d)}
+                onSelect={(d) => { if (d) { setDate(d); setCalendarOpen(false); } }}
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
               />
