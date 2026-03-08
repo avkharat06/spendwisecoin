@@ -60,7 +60,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
       toast({ title: 'Enter a valid amount', variant: 'destructive' });
       return;
     }
-    const cat = categories[selectedCat];
+    const cat = recentSortedCategories.find(c => c.name === selectedCatName);
     if (!cat) {
       toast({ title: 'Select a category', variant: 'destructive' });
       return;
