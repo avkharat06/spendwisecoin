@@ -102,8 +102,8 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
 
       {/* Spent Row */}
       <div>
-        <p className="text-[10px] font-semibold text-destructive uppercase tracking-wider mb-2">Spent</p>
-        <div className="grid grid-cols-2 gap-3">
+        <p className="text-[10px] font-semibold text-destructive uppercase tracking-wider mb-1.5">Spent</p>
+        <div className="grid grid-cols-2 gap-2">
           {[
             { label: 'Today', value: stats.todaySpent },
             { label: 'This Month', value: stats.monthSpent },
@@ -111,11 +111,11 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
             <button
               key={item.label}
               onClick={() => onFilterView?.('expense')}
-              className="rounded-xl bg-card p-3.5 border border-border text-left active:scale-95 transition-all"
+              className="rounded-lg bg-card px-3 py-2 border border-border text-left active:scale-95 transition-all"
               style={{ boxShadow: 'var(--shadow-card)' }}
             >
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{item.label}</p>
-              <p className="text-base font-display font-bold text-destructive">{fmt(item.value)}</p>
+              <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">{item.label}</p>
+              <p className="text-sm font-display font-bold text-destructive">{fmt(item.value)}</p>
             </button>
           ))}
         </div>
@@ -123,8 +123,8 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
 
       {/* Income Row */}
       <div>
-        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">Income</p>
-        <div className="grid grid-cols-2 gap-3">
+        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-1.5">Income</p>
+        <div className="grid grid-cols-2 gap-2">
           {[
             { label: 'Today', value: stats.todayIncome },
             { label: 'This Month', value: stats.monthIncome },
@@ -132,11 +132,11 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
             <button
               key={item.label}
               onClick={() => onFilterView?.('income')}
-              className="rounded-xl bg-card p-3.5 border border-border text-left active:scale-95 transition-all"
+              className="rounded-lg bg-card px-3 py-2 border border-border text-left active:scale-95 transition-all"
               style={{ boxShadow: 'var(--shadow-card)' }}
             >
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{item.label}</p>
-              <p className="text-base font-display font-bold text-primary">{fmt(item.value)}</p>
+              <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">{item.label}</p>
+              <p className="text-sm font-display font-bold text-primary">{fmt(item.value)}</p>
             </button>
           ))}
         </div>
