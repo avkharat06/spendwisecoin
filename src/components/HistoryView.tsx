@@ -4,6 +4,7 @@ import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartph
 import { useToast } from '@/hooks/use-toast';
 import SwipeableTransaction from './SwipeableTransaction';
 import EditTransactionModal from './EditTransactionModal';
+import TransactionDetailModal from './TransactionDetailModal';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
