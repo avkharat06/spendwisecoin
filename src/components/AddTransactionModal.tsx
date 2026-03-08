@@ -64,7 +64,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
     <>
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60 backdrop-blur-sm" onClick={onClose}>
         <div
-          className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in"
+          className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in max-h-[90vh] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-6">
