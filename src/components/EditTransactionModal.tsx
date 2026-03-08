@@ -23,6 +23,7 @@ interface Transaction {
   date: string;
   note: string | null;
   quantity: number;
+  payment_method?: string;
 }
 
 interface EditTransactionModalProps {
@@ -36,7 +37,9 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
   const [merchant, setMerchant] = useState(transaction.merchant);
   const [date, setDate] = useState<Date>(new Date(transaction.date + 'T00:00:00'));
   const [quantity, setQuantity] = useState(String(transaction.quantity || 1));
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cash'>((transaction.payment_method as 'upi' | 'cash') || 'cash');
   const [showConfirm, setShowConfirm] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const { toast } = useToast();
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
@@ -67,6 +70,7 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
         merchant: merchant || cat.name,
         date: format(date, 'yyyy-MM-dd'),
         quantity: qty,
+        payment_method: paymentMethod,
       });
       toast({ title: 'Transaction updated!' });
       onClose();
@@ -116,7 +120,7 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
           </div>
 
           {/* Date Picker */}
-          <Popover>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <button className={cn("w-full px-5 py-3.5 rounded-xl bg-secondary text-sm border border-border focus:border-primary transition-all text-left flex items-center gap-3 mb-4")}>
                 <CalendarIcon size={16} className="text-muted-foreground" />
@@ -124,9 +128,28 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="center">
-              <Calendar mode="single" selected={date} onSelect={d => d && setDate(d)} initialFocus className="p-3 pointer-events-auto" />
+              <Calendar mode="single" selected={date} onSelect={d => { if (d) { setDate(d); setCalendarOpen(false); } }} initialFocus className="p-3 pointer-events-auto" />
             </PopoverContent>
           </Popover>
+
+          {/* Payment Method Toggle */}
+          <div className="mb-4">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Payment Method</label>
+            <div className="flex rounded-xl bg-secondary p-1">
+              <button
+                onClick={() => setPaymentMethod('upi')}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${paymentMethod === 'upi' ? 'bg-accent text-accent-foreground shadow-sm' : 'text-muted-foreground'}`}
+              >
+                📱 UPI
+              </button>
+              <button
+                onClick={() => setPaymentMethod('cash')}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${paymentMethod === 'cash' ? 'bg-accent text-accent-foreground shadow-sm' : 'text-muted-foreground'}`}
+              >
+                💵 Cash
+              </button>
+            </div>
+          </div>
 
           {/* Category Grid */}
           <div className="grid grid-cols-5 gap-2 mb-6 max-h-40 overflow-y-auto">
