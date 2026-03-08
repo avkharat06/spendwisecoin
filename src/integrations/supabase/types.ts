@@ -90,6 +90,7 @@ export type Database = {
           is_deleted: boolean
           merchant: string
           note: string | null
+          quantity: number
           type: string
           updated_at: string
           user_id: string
@@ -106,6 +107,7 @@ export type Database = {
           is_deleted?: boolean
           merchant?: string
           note?: string | null
+          quantity?: number
           type: string
           updated_at?: string
           user_id: string
@@ -122,6 +124,7 @@ export type Database = {
           is_deleted?: boolean
           merchant?: string
           note?: string | null
+          quantity?: number
           type?: string
           updated_at?: string
           user_id?: string
