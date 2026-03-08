@@ -69,7 +69,7 @@ const Index = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [view, showAdd, showFeedback, lastBackPress]);
+  }, [view, showAdd, showFeedback]);
 
   const handleLogout = async () => {
     await signOut();
