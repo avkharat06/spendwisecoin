@@ -96,11 +96,11 @@
   }
 
   .glow-success {
-    box-shadow: 0 0 30px hsla(152, 60%, 48%, 0.25);
+    box-shadow: 0 0 30px hsla(163, 100%, 39%, 0.2);
   }
 
   .glow-danger {
-    box-shadow: 0 0 30px hsla(0, 72%, 55%, 0.25);
+    box-shadow: 0 0 30px hsla(0, 72%, 55%, 0.2);
   }
 
   .text-gradient {
