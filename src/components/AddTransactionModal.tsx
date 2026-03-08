@@ -199,9 +199,9 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
             {visibleCategories.map((cat, i) => (
               <button
                 key={cat.name}
-                onClick={() => setSelectedCat(categories.indexOf(cat))}
+                onClick={() => setSelectedCatName(cat.name)}
                 className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 ${
-                  selectedCat === categories.indexOf(cat) ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'
+                  selectedCatName === cat.name ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'
                 }`}
               >
                 <span className="text-xl">{cat.emoji}</span>
