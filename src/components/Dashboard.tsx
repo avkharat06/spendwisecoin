@@ -120,7 +120,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
         </div>
         <div className="flex gap-2 mt-1">
           <button onClick={() => onPaymentMethodView?.('upi')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">📱 UPI</p>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💳 UPI</p>
             <p className="text-xs font-display font-bold text-green-400">
               {fmt(stats.totalUpiIncome - stats.totalUpiSpent)}
             </p>
