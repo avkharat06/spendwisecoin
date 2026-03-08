@@ -49,7 +49,13 @@ const AuthScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-5">
+    <div className="min-h-screen flex items-center justify-center px-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(180, 70%, 10%) 0%, hsl(220, 20%, 5%) 30%, hsl(0, 60%, 12%) 60%, hsl(152, 50%, 10%) 100%)' }}>
+      {/* Animated glow orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/4 -left-1/4 w-[60%] h-[60%] rounded-full opacity-30 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(180, 80%, 40%, 0.3), transparent 70%)' }} />
+        <div className="absolute -bottom-1/4 -right-1/4 w-[50%] h-[50%] rounded-full opacity-20 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(0, 70%, 40%, 0.25), transparent 70%)', animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] rounded-full opacity-20 animate-pulse" style={{ background: 'radial-gradient(circle, hsla(152, 60%, 40%, 0.25), transparent 70%)', animationDelay: '2s' }} />
+      </div>
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
           <img src={spendwiseLogo} alt="SpendWise" className="w-16 h-16 mx-auto mb-3 rounded-2xl" />
