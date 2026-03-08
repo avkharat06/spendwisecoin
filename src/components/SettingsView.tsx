@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useProfile, useUpdateProfile } from '@/lib/store';
-import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save, Camera } from 'lucide-react';
+import { useProfile, useUpdateProfile, useCustomCategories } from '@/lib/store';
+import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import EditCategoryModal from './EditCategoryModal';
 
 interface SettingsViewProps {
   onBack: () => void;
@@ -22,7 +23,9 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [budgetValue, setBudgetValue] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: customCategories = [] } = useCustomCategories();
 
   // Sync state when profile loads
   useEffect(() => {
@@ -318,6 +321,36 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
           </div>
         )}
       </div>
+
+      {/* Custom Categories */}
+      {customCategories.length > 0 && (
+        <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <Tag size={18} className="text-primary" />
+            <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">My Categories</h3>
+          </div>
+          <div className="space-y-2">
+            {customCategories.map(cat => (
+              <div key={cat.id} className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-secondary">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg" style={{ backgroundColor: cat.color + '20' }}>
+                  {cat.emoji}
+                </div>
+                <span className="flex-1 text-sm font-medium text-foreground">{cat.name}</span>
+                <button
+                  onClick={() => setEditingCategory({ id: cat.id, name: cat.name, emoji: cat.emoji, color: cat.color })}
+                  className="p-1.5 rounded-lg bg-card hover:bg-card/80 active:scale-95 transition-all"
+                >
+                  <Pencil size={14} className="text-muted-foreground" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {editingCategory && (
+        <EditCategoryModal category={editingCategory} onClose={() => setEditingCategory(null)} />
+      )}
     </div>
   );
 };

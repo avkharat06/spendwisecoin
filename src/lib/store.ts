@@ -248,6 +248,22 @@ export function useAddCustomCategory() {
   });
 }
 
+export function useUpdateCustomCategory() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; emoji?: string; color?: string }) => {
+      const { error } = await supabase
+        .from('custom_categories')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['custom-categories'] }),
+  });
+}
+
 export function useDeleteCustomCategory() {
   const { user } = useAuth();
   const qc = useQueryClient();
