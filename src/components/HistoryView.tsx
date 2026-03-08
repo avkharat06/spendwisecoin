@@ -174,7 +174,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-1 px-3 py-2 rounded-xl bg-secondary text-xs font-semibold text-foreground active:scale-95 transition-all">
-              {paymentFilter === 'upi' ? '📱 UPI' : paymentFilter === 'cash' ? '💵 Cash' : '💳 All'}
+              {paymentFilter === 'upi' ? '💳 UPI' : paymentFilter === 'cash' ? '💵 Cash' : '💳 All'}
               <ChevronDown size={14} className="text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
