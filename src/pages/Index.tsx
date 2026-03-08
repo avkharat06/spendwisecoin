@@ -39,13 +39,18 @@ const Index = () => {
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       e.preventDefault();
-      if (view !== 'home') {
+      if (showAdd) {
+        setShowAdd(false);
+        window.history.pushState(null, '', window.location.href);
+      } else if (showFeedback) {
+        setShowFeedback(false);
+        window.history.pushState(null, '', window.location.href);
+      } else if (view !== 'home') {
         setView('home');
         window.history.pushState(null, '', window.location.href);
       } else {
         const now = Date.now();
         if (now - lastBackPress < 2000) {
-          // Double back — allow exit
           window.removeEventListener('popstate', handlePopState);
           window.history.back();
           return;
