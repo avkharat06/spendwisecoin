@@ -40,14 +40,36 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cash'>((transaction.payment_method as 'upi' | 'cash') || 'cash');
   const [showConfirm, setShowConfirm] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const { toast } = useToast();
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
   const updateTransaction = useUpdateTransaction();
   const categories = useAllCategories();
+  const { data: transactions = [] } = useTransactions();
 
-  const catIndex = categories.findIndex(c => c.name === transaction.category);
-  const [selectedCat, setSelectedCat] = useState(catIndex >= 0 ? catIndex : 0);
+  // Sort categories by most recent usage
+  const recentSortedCategories = useMemo(() => {
+    const lastUsed = new Map<string, string>();
+    transactions.forEach(tx => {
+      const existing = lastUsed.get(tx.category);
+      if (!existing || tx.date > existing) {
+        lastUsed.set(tx.category, tx.date);
+      }
+    });
+    return [...categories].sort((a, b) => {
+      const aDate = lastUsed.get(a.name) || '';
+      const bDate = lastUsed.get(b.name) || '';
+      if (aDate && bDate) return bDate.localeCompare(aDate);
+      if (aDate) return -1;
+      if (bDate) return 1;
+      return 0;
+    });
+  }, [categories, transactions]);
+
+  const visibleCategories = useMemo(() => showAllCategories ? recentSortedCategories : recentSortedCategories.slice(0, 5), [recentSortedCategories, showAllCategories]);
+
+  const [selectedCatName, setSelectedCatName] = useState(transaction.category);
 
   const handleSave = () => setShowConfirm(true);
 
