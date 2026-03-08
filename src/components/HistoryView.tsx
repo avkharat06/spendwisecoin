@@ -278,6 +278,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);
                 if (longPressTriggered.current) return;
                 if (selectionMode) toggle(tx.id);
+                else setEditingTx(tx);
               };
               const handlePointerLeave = () => {
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);

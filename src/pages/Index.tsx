@@ -27,7 +27,7 @@ const Index = () => {
   const { data: profile } = useProfile();
   const [view, setView] = useState<ViewType>('home');
   const [showAdd, setShowAdd] = useState(false);
-  const [lastBackPress, setLastBackPress] = useState(0);
+  const lastBackPressRef = useRef(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [txFilter, setTxFilter] = useState<'expense' | 'income' | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
