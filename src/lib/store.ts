@@ -141,6 +141,30 @@ export function useRestoreTransactions() {
   });
 }
 
+export function useUpdateTransaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: {
+      id: string;
+      amount?: number;
+      type?: string;
+      category?: string;
+      category_emoji?: string;
+      category_color?: string;
+      merchant?: string;
+      date?: string;
+      note?: string;
+    }) => {
+      const { error } = await supabase
+        .from('transactions')
+        .update(updates)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['transactions'] }),
+  });
+}
+
 export function usePermanentDeleteTransactions() {
   const qc = useQueryClient();
   return useMutation({
