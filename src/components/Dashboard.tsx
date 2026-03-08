@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTransactions, useProfile } from '@/lib/store';
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { TrendingDown, TrendingUp, Minus, AlertTriangle } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface DashboardProps {
   onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
@@ -124,29 +125,72 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         </div>
       )}
 
-      {/* Category Breakdown */}
+      {/* Pie Chart + Category Breakdown */}
       {categoryBreakdown.length > 0 && (
         <div>
-          <h3 className="font-display font-semibold text-sm text-muted-foreground uppercase tracking-widest mb-3">Spending by Category</h3>
-          <div className="card-premium space-y-4">
-            {categoryBreakdown.map(cat => (
-              <button
-                key={cat.name}
-                onClick={() => onCategoryView?.(cat.name)}
-                className="w-full text-left active:scale-[0.98] transition-all"
-              >
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-foreground font-medium">{cat.emoji} {cat.name}</span>
-                  <span className="text-muted-foreground">{fmt(cat.amount)}</span>
-                </div>
-                <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${cat.percent}%`, backgroundColor: cat.color }}
-                  />
-                </div>
-              </button>
-            ))}
+          <h3 className="font-display font-semibold text-sm text-muted-foreground uppercase tracking-widest mb-3">Monthly Breakdown</h3>
+          <div className="card-premium">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-28 h-28 flex-shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={categoryBreakdown} dataKey="amount" cx="50%" cy="50%" innerRadius={30} outerRadius={50} paddingAngle={2} strokeWidth={0}>
+                      {categoryBreakdown.map((cat, i) => (
+                        <Cell key={i} fill={cat.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.[0]) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <div className="bg-card border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
+                            <p className="font-semibold text-foreground">{d.emoji} {d.name}</p>
+                            <p className="text-muted-foreground">{fmt(d.amount)}</p>
+                          </div>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 space-y-2">
+                {categoryBreakdown.slice(0, 5).map(cat => (
+                  <button
+                    key={cat.name}
+                    onClick={() => onCategoryView?.(cat.name)}
+                    className="w-full flex items-center justify-between text-sm active:scale-[0.98] transition-all"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                      <span className="text-foreground">{cat.name}</span>
+                    </div>
+                    <span className="text-muted-foreground font-display font-semibold">{fmt(cat.amount)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Alarming messages */}
+            {categoryBreakdown[0] && (
+              <div className="px-3 py-2 rounded-xl bg-primary/10 text-xs text-primary font-medium flex items-center gap-1.5">
+                💡 You spent the most on <strong>{categoryBreakdown[0].name}</strong> this month — {fmt(categoryBreakdown[0].amount)}
+              </div>
+            )}
+            {budgetEnabled && monthlyBudget > 0 && stats.budgetUsage > 80 && (
+              <div className="mt-2 px-3 py-2 rounded-xl bg-destructive/10 text-xs text-destructive font-medium flex items-center gap-1.5">
+                <AlertTriangle size={14} />
+                {stats.budgetUsage >= 100
+                  ? `Budget exceeded! You've spent ${fmt(stats.monthSpent)} of ${fmt(monthlyBudget)}`
+                  : `Warning: You've used ${Math.round(stats.budgetUsage)}% of your monthly budget`}
+              </div>
+            )}
+            {stats.monthSpent > stats.monthIncome && stats.monthIncome > 0 && (
+              <div className="mt-2 px-3 py-2 rounded-xl bg-destructive/10 text-xs text-destructive font-medium flex items-center gap-1.5">
+                <AlertTriangle size={14} />
+                Your spending exceeds your income by {fmt(stats.monthSpent - stats.monthIncome)} this month
+              </div>
+            )}
           </div>
         </div>
       )}
