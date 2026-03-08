@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProfile, useUpdateProfile } from '@/lib/store';
 import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -11,15 +11,23 @@ interface SettingsViewProps {
 }
 
 const SettingsView = ({ onBack }: SettingsViewProps) => {
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const [displayName, setDisplayName] = useState(profile?.display_name || '');
+  const [displayName, setDisplayName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [budgetValue, setBudgetValue] = useState(String(profile?.monthly_budget || ''));
+  const [budgetValue, setBudgetValue] = useState('');
+
+  // Sync state when profile loads
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name || '');
+      setBudgetValue(String(profile.monthly_budget || ''));
+    }
+  }, [profile]);
 
   const handleSaveProfile = async () => {
     const updates: Record<string, any> = {};
@@ -63,19 +71,39 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
     await updateProfile.mutateAsync({ [key]: value });
   };
 
-  if (!profile) return (
-    <div className="animate-in pb-4">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
-          <ArrowLeft size={18} className="text-foreground" />
-        </button>
-        <h2 className="text-2xl font-display font-bold text-foreground">Settings</h2>
+  if (isLoading) {
+    return (
+      <div className="animate-in pb-4">
+        <div className="flex items-center gap-3 mb-6">
+          <button onClick={onBack} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
+            <ArrowLeft size={18} className="text-foreground" />
+          </button>
+          <h2 className="text-2xl font-display font-bold text-foreground">Settings</h2>
+        </div>
+        <div className="text-center py-16">
+          <p className="text-muted-foreground font-medium">Loading settings...</p>
+        </div>
       </div>
-      <div className="text-center py-16">
-        <p className="text-muted-foreground font-medium">Loading settings...</p>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="animate-in pb-4">
+        <div className="flex items-center gap-3 mb-6">
+          <button onClick={onBack} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
+            <ArrowLeft size={18} className="text-foreground" />
+          </button>
+          <h2 className="text-2xl font-display font-bold text-foreground">Settings</h2>
+        </div>
+        <div className="text-center py-16">
+          <p className="text-4xl mb-3">⚙️</p>
+          <p className="text-muted-foreground font-medium">Unable to load settings</p>
+          <p className="text-muted-foreground text-sm mt-1">Please try signing out and back in</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="animate-in pb-4">
@@ -87,7 +115,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       </div>
 
       {/* Profile Section */}
-      <div className="card-premium mb-4">
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center gap-2 mb-4">
           <User size={18} className="text-primary" />
           <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">Profile</h3>
@@ -137,7 +165,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       </div>
 
       {/* Currency Section */}
-      <div className="card-premium mb-4">
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center gap-2 mb-4">
           <DollarSign size={18} className="text-primary" />
           <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">Currency</h3>
@@ -160,7 +188,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       </div>
 
       {/* Recent Activity Toggle */}
-      <div className="card-premium mb-4">
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {profile.show_recent_activity ? <Eye size={18} className="text-primary" /> : <EyeOff size={18} className="text-muted-foreground" />}
@@ -177,7 +205,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       </div>
 
       {/* Monthly Budget Toggle */}
-      <div className="card-premium mb-4">
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Wallet size={18} className={profile.budget_enabled ? 'text-primary' : 'text-muted-foreground'} />
