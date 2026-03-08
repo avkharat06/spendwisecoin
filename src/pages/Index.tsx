@@ -8,7 +8,7 @@ import InsightsView from '@/components/InsightsView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
 import SettingsView from '@/components/SettingsView';
 import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
