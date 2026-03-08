@@ -317,7 +317,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
                   </p>
                 </div>
                 <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                  {(tx as any).payment_method === 'upi' ? '📱' : '💵'} {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
+                  {(tx as any).payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)} {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
                 </p>
               </div>
             ))}

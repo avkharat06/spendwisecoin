@@ -140,7 +140,7 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
                 onClick={() => setPaymentMethod('upi')}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${paymentMethod === 'upi' ? 'bg-accent text-accent-foreground shadow-sm' : 'text-muted-foreground'}`}
               >
-                📱 UPI
+                💳 UPI
               </button>
               <button
                 onClick={() => setPaymentMethod('cash')}
