@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTransactions, useProfile } from '@/lib/store';
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { TrendingDown, TrendingUp, Minus, AlertTriangle } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface DashboardProps {
   onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
