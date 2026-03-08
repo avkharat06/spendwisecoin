@@ -60,18 +60,25 @@ const Index = () => {
     await signOut();
   };
 
+  const navigateTo = useCallback((newView: ViewType) => {
+    if (newView !== 'home') {
+      window.history.pushState(null, '', window.location.href);
+    }
+    setView(newView);
+  }, []);
+
   const handleFilterView = (filter: 'expense' | 'income' | 'all') => {
     if (filter === 'all') {
-      setView('history');
+      navigateTo('history');
     } else {
       setTxFilter(filter);
-      setView('filtered');
+      navigateTo('filtered');
     }
   };
 
   const handleCategoryView = (category: string) => {
     setCategoryFilter(category);
-    setView('category');
+    navigateTo('category');
   };
 
   const handleFeedbackSubmit = () => {
