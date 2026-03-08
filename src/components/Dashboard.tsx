@@ -150,6 +150,26 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
             <p className="text-sm font-display font-bold text-cyan-400">{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}</p>
           </button>
         </div>
+
+        {/* UPI vs Cash Breakdown */}
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <div className="rounded-xl bg-secondary/60 px-3 py-2.5">
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="text-sm">📱</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">UPI</span>
+            </div>
+            <p className="text-xs font-display font-bold text-destructive">-{fmt(stats.monthUpiSpent)}</p>
+            <p className="text-xs font-display font-bold text-green-400">+{fmt(stats.monthUpiIncome)}</p>
+          </div>
+          <div className="rounded-xl bg-secondary/60 px-3 py-2.5">
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="text-sm">💵</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Cash</span>
+            </div>
+            <p className="text-xs font-display font-bold text-destructive">-{fmt(stats.monthCashSpent)}</p>
+            <p className="text-xs font-display font-bold text-green-400">+{fmt(stats.monthCashIncome)}</p>
+          </div>
+        </div>
       </div>
 
       {/* Monthly Breakdown — Donut Chart + Legend */}
