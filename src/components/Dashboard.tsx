@@ -114,14 +114,14 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         <div className="flex gap-2 mt-1">
           <div className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">📱 UPI</p>
-            <p className={`text-xs font-display font-bold ${(stats.monthUpiIncome - stats.monthUpiSpent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
-              {fmt(Math.abs(stats.monthUpiIncome - stats.monthUpiSpent))}
+            <p className="text-xs font-display font-bold text-green-400">
+              {fmt(stats.monthUpiIncome - stats.monthUpiSpent)}
             </p>
           </div>
           <div className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💵 Cash</p>
-            <p className={`text-xs font-display font-bold ${(stats.monthCashIncome - stats.monthCashSpent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
-              {fmt(Math.abs(stats.monthCashIncome - stats.monthCashSpent))}
+            <p className="text-xs font-display font-bold text-green-400">
+              {fmt(stats.monthCashIncome - stats.monthCashSpent)}
             </p>
           </div>
         </div>
