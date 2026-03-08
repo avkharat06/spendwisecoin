@@ -29,7 +29,8 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
     weekStart.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     weekStart.setHours(0, 0, 0, 0);
 
-    let todaySpent = 0, weekSpent = 0, monthSpent = 0, monthIncome = 0;
+    let todaySpent = 0, weekSpent = 0, monthSpent = 0;
+    let todayIncome = 0, weekIncome = 0, monthIncome = 0;
 
     transactions.forEach(tx => {
       const txDate = new Date(tx.date + 'T00:00:00');
@@ -38,12 +39,14 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         if (txDate >= weekStart) weekSpent += tx.amount;
         if (txDate >= monthStart) monthSpent += tx.amount;
       } else {
+        if (tx.date === today) todayIncome += tx.amount;
+        if (txDate >= weekStart) weekIncome += tx.amount;
         if (txDate >= monthStart) monthIncome += tx.amount;
       }
     });
 
     const budgetUsage = monthlyBudget > 0 ? (monthSpent / monthlyBudget) * 100 : 0;
-    return { todaySpent, weekSpent, monthSpent, monthIncome, budgetUsage };
+    return { todaySpent, weekSpent, monthSpent, todayIncome, weekIncome, monthIncome, budgetUsage };
   }, [transactions, monthlyBudget]);
 
   type BreakdownPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -97,23 +100,48 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         </h2>
       </div>
 
-      {/* Today / This Week / This Month — MoneyWise style */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: 'Today', value: stats.todaySpent },
-          { label: 'This Week', value: stats.weekSpent },
-          { label: 'This Month', value: stats.monthSpent },
-        ].map(item => (
-          <button
-            key={item.label}
-            onClick={() => onFilterView?.('expense')}
-            className="rounded-xl bg-card p-3.5 border border-border text-left active:scale-95 transition-all"
-            style={{ boxShadow: 'var(--shadow-card)' }}
-          >
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{item.label}</p>
-            <p className="text-base font-display font-bold text-foreground">{fmt(item.value)}</p>
-          </button>
-        ))}
+      {/* Spent Row */}
+      <div>
+        <p className="text-[10px] font-semibold text-destructive uppercase tracking-wider mb-2">Spent</p>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Today', value: stats.todaySpent },
+            { label: 'This Week', value: stats.weekSpent },
+            { label: 'This Month', value: stats.monthSpent },
+          ].map(item => (
+            <button
+              key={item.label}
+              onClick={() => onFilterView?.('expense')}
+              className="rounded-xl bg-card p-3.5 border border-border text-left active:scale-95 transition-all"
+              style={{ boxShadow: 'var(--shadow-card)' }}
+            >
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{item.label}</p>
+              <p className="text-base font-display font-bold text-destructive">{fmt(item.value)}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Income Row */}
+      <div>
+        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">Income</p>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Today', value: stats.todayIncome },
+            { label: 'This Week', value: stats.weekIncome },
+            { label: 'This Month', value: stats.monthIncome },
+          ].map(item => (
+            <button
+              key={item.label}
+              onClick={() => onFilterView?.('income')}
+              className="rounded-xl bg-card p-3.5 border border-border text-left active:scale-95 transition-all"
+              style={{ boxShadow: 'var(--shadow-card)' }}
+            >
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{item.label}</p>
+              <p className="text-base font-display font-bold text-primary">{fmt(item.value)}</p>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Monthly Breakdown — Donut Chart + Legend */}
