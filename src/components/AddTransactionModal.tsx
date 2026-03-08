@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { X, CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import { useAddTransaction, useAllCategories } from '@/lib/store';
+import { useAddTransaction, useAllCategories, useTransactions } from '@/lib/store';
 import { useProfile } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -16,7 +16,7 @@ interface AddTransactionModalProps {
 const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'expense' | 'income'>('expense');
-  const [selectedCat, setSelectedCat] = useState(0);
+  const [selectedCatName, setSelectedCatName] = useState<string | null>(null);
   const [merchant, setMerchant] = useState('');
   const [date, setDate] = useState<Date>(new Date());
   const [quantity, setQuantity] = useState('1');
@@ -29,7 +29,29 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const currency = profile?.currency || '₹';
   const addTransaction = useAddTransaction();
   const categories = useAllCategories();
-  const visibleCategories = useMemo(() => showAllCategories ? categories : categories.slice(0, 5), [categories, showAllCategories]);
+  const { data: transactions = [] } = useTransactions();
+
+  // Sort categories by most recent usage
+  const recentSortedCategories = useMemo(() => {
+    const lastUsed = new Map<string, string>();
+    transactions.forEach(tx => {
+      const existing = lastUsed.get(tx.category);
+      if (!existing || tx.date > existing || (tx.date === existing && tx.created_at > (lastUsed.get(tx.category + '_ca') || ''))) {
+        lastUsed.set(tx.category, tx.date);
+        lastUsed.set(tx.category + '_ca', tx.created_at);
+      }
+    });
+    return [...categories].sort((a, b) => {
+      const aDate = lastUsed.get(a.name) || '';
+      const bDate = lastUsed.get(b.name) || '';
+      if (aDate && bDate) return bDate.localeCompare(aDate);
+      if (aDate) return -1;
+      if (bDate) return 1;
+      return 0;
+    });
+  }, [categories, transactions]);
+
+  const visibleCategories = useMemo(() => showAllCategories ? recentSortedCategories : recentSortedCategories.slice(0, 5), [recentSortedCategories, showAllCategories]);
 
   const handleSubmit = async () => {
     const amt = Number(amount);
@@ -38,7 +60,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
       toast({ title: 'Enter a valid amount', variant: 'destructive' });
       return;
     }
-    const cat = categories[selectedCat];
+    const cat = recentSortedCategories.find(c => c.name === selectedCatName);
     if (!cat) {
       toast({ title: 'Select a category', variant: 'destructive' });
       return;
@@ -177,9 +199,9 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
             {visibleCategories.map((cat, i) => (
               <button
                 key={cat.name}
-                onClick={() => setSelectedCat(categories.indexOf(cat))}
+                onClick={() => setSelectedCatName(cat.name)}
                 className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 ${
-                  selectedCat === categories.indexOf(cat) ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'
+                  selectedCatName === cat.name ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'
                 }`}
               >
                 <span className="text-xl">{cat.emoji}</span>
