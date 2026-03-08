@@ -147,15 +147,6 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
               ))}
             </div>
           </div>
-
-          {/* Top spending insight */}
-          {topCategory && (
-            <div className="mt-4 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
-              <p className="text-xs text-primary font-medium">
-                💡 You spent the most on <strong>{topCategory.name}</strong> this month — {fmt(topCategory.amount)}
-              </p>
-            </div>
-          )}
         </div>
       )}
 
@@ -205,25 +196,28 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         </div>
       )}
 
-      {/* Alarming Messages */}
-      {(stats.monthSpent > 0 || budgetEnabled) && (
-        <div className="space-y-2">
-          {budgetEnabled && monthlyBudget > 0 && stats.budgetUsage > 80 && (
-            <div className="px-3 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive font-medium flex items-center gap-2">
-              <AlertTriangle size={14} className="flex-shrink-0" />
-              {stats.budgetUsage >= 100
-                ? `Budget exceeded! You've spent ${fmt(stats.monthSpent)} of ${fmt(monthlyBudget)}`
-                : `Warning: You've used ${Math.round(stats.budgetUsage)}% of your monthly budget`}
-            </div>
-          )}
-          {stats.monthSpent > stats.monthIncome && stats.monthIncome > 0 && (
-            <div className="px-3 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive font-medium flex items-center gap-2">
-              <AlertTriangle size={14} className="flex-shrink-0" />
-              Your spending exceeds your income by {fmt(stats.monthSpent - stats.monthIncome)} this month
-            </div>
-          )}
-        </div>
-      )}
+      {/* All Alarming Messages — Bottom */}
+      <div className="space-y-2">
+        {topCategory && (
+          <div className="px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary font-medium flex items-center gap-2">
+            💡 You spent the most on <strong>{topCategory.name}</strong> this month — {fmt(topCategory.amount)}
+          </div>
+        )}
+        {budgetEnabled && monthlyBudget > 0 && stats.budgetUsage > 80 && (
+          <div className="px-3 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive font-medium flex items-center gap-2">
+            <AlertTriangle size={14} className="flex-shrink-0" />
+            {stats.budgetUsage >= 100
+              ? `Budget exceeded! You've spent ${fmt(stats.monthSpent)} of ${fmt(monthlyBudget)}`
+              : `Warning: You've used ${Math.round(stats.budgetUsage)}% of your monthly budget`}
+          </div>
+        )}
+        {stats.monthSpent > stats.monthIncome && stats.monthIncome > 0 && (
+          <div className="px-3 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive font-medium flex items-center gap-2">
+            <AlertTriangle size={14} className="flex-shrink-0" />
+            Your spending exceeds your income by {fmt(stats.monthSpent - stats.monthIncome)} this month
+          </div>
+        )}
+      </div>
 
       {transactions.length === 0 && (
         <div className="text-center py-16">
