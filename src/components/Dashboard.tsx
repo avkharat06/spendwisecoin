@@ -133,10 +133,10 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
             className="rounded-xl bg-secondary/80 px-3 py-3 text-center active:scale-95 transition-all"
           >
             <div className="flex items-center justify-center gap-1 mb-1">
-              <span className="text-muted-foreground text-[10px]">—</span>
-              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Net</span>
+              <span className="text-cyan-400 text-[10px]">—</span>
+              <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">Net</span>
             </div>
-            <p className="text-sm font-display font-bold text-foreground">{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}</p>
+            <p className="text-sm font-display font-bold text-cyan-400">{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}</p>
           </button>
         </div>
       </div>
