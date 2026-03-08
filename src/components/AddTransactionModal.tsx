@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { X, CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAddTransaction, useAllCategories } from '@/lib/store';
