@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useProfile } from '@/lib/store';
 import Dashboard from '@/components/Dashboard';
@@ -34,22 +34,51 @@ const Index = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const { toast } = useToast();
 
+  // Handle mobile back button — navigate back to home instead of exiting
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      if (view !== 'home') {
+        setView('home');
+        window.history.pushState(null, '', window.location.href);
+      } else {
+        // Push state again to prevent exit
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    // Push an initial state so we have something to "go back" to
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [view]);
+
   const handleLogout = async () => {
     await signOut();
   };
 
+  const navigateTo = useCallback((newView: ViewType) => {
+    if (newView !== 'home') {
+      window.history.pushState(null, '', window.location.href);
+    }
+    setView(newView);
+  }, []);
+
   const handleFilterView = (filter: 'expense' | 'income' | 'all') => {
     if (filter === 'all') {
-      setView('history');
+      navigateTo('history');
     } else {
       setTxFilter(filter);
-      setView('filtered');
+      navigateTo('filtered');
     }
   };
 
   const handleCategoryView = (category: string) => {
     setCategoryFilter(category);
-    setView('category');
+    navigateTo('category');
   };
 
   const handleFeedbackSubmit = () => {
@@ -85,23 +114,23 @@ const Index = () => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48 rounded-xl border-border/50 bg-card p-1.5">
-              <DropdownMenuItem onClick={() => setView('home')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => navigateTo('home')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Home size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Home</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('history')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => navigateTo('history')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Clock size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">History</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('insights')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => navigateTo('insights')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Lightbulb size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Insights</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('settings')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => navigateTo('settings')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Settings size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => navigateTo('deleted')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Deleted History</span>
               </DropdownMenuItem>
