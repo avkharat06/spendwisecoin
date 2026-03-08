@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { X, CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import { useAddTransaction, useAllCategories } from '@/lib/store';
+import { useAddTransaction, useAllCategories, useTransactions } from '@/lib/store';
 import { useProfile } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
