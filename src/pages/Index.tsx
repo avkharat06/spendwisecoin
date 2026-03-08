@@ -8,7 +8,7 @@ import InsightsView from '@/components/InsightsView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
 import SettingsView from '@/components/SettingsView';
 import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -76,6 +76,7 @@ const Index = () => {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2.5 active:scale-95 transition-all outline-none">
                 <Avatar className="h-9 w-9 border-2 border-primary/30">
+                  <AvatarImage src={(profile as any)?.avatar_url || undefined} alt="Profile" />
                   <AvatarFallback className="bg-primary/15 text-primary text-xs font-bold">
                     {getInitials()}
                   </AvatarFallback>

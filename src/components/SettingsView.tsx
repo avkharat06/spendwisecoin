@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useProfile, useUpdateProfile } from '@/lib/store';
-import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save } from 'lucide-react';
+import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface SettingsViewProps {
   onBack: () => void;
@@ -20,6 +21,8 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [budgetValue, setBudgetValue] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync state when profile loads
   useEffect(() => {
@@ -71,6 +74,50 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
     await updateProfile.mutateAsync({ [key]: value });
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: 'Please upload a JPG, PNG, or WebP image', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'Image must be under 2MB', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${ext}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = `${publicUrl}?t=${Date.now()}`;
+      await updateProfile.mutateAsync({ avatar_url: avatarUrl });
+      toast({ title: 'Profile photo updated! 📸' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const getInitials = () => {
+    if (!profile?.display_name) return '?';
+    return profile.display_name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   if (isLoading) {
     return (
       <div className="animate-in pb-4">
@@ -120,6 +167,36 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
           <User size={18} className="text-primary" />
           <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">Profile</h3>
         </div>
+
+        {/* Avatar Upload */}
+        <div className="flex flex-col items-center mb-5">
+          <div className="relative">
+            <Avatar className="h-20 w-20 border-2 border-primary/30">
+              <AvatarImage src={(profile as any)?.avatar_url || undefined} alt="Profile" />
+              <AvatarFallback className="bg-primary/15 text-primary text-xl font-bold">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md active:scale-90 transition-all disabled:opacity-50"
+            >
+              <Camera size={14} />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            {uploadingAvatar ? 'Uploading...' : 'Tap to change photo'}
+          </p>
+        </div>
+
         <div className="space-y-3">
           <div>
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">Name</label>
