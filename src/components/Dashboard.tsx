@@ -34,6 +34,8 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
     let todayIncome = 0, weekIncome = 0, monthIncome = 0;
     let monthUpiSpent = 0, monthCashSpent = 0;
     let monthUpiIncome = 0, monthCashIncome = 0;
+    let totalUpiSpent = 0, totalCashSpent = 0;
+    let totalUpiIncome = 0, totalCashIncome = 0;
 
     transactions.forEach(tx => {
       const txDate = new Date(tx.date + 'T00:00:00');
@@ -46,6 +48,8 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
           if (pm === 'upi') monthUpiSpent += tx.amount;
           else monthCashSpent += tx.amount;
         }
+        if (pm === 'upi') totalUpiSpent += tx.amount;
+        else totalCashSpent += tx.amount;
       } else {
         if (tx.date === today) todayIncome += tx.amount;
         if (txDate >= weekStart) weekIncome += tx.amount;
@@ -54,11 +58,13 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
           if (pm === 'upi') monthUpiIncome += tx.amount;
           else monthCashIncome += tx.amount;
         }
+        if (pm === 'upi') totalUpiIncome += tx.amount;
+        else totalCashIncome += tx.amount;
       }
     });
 
     const budgetUsage = monthlyBudget > 0 ? (monthSpent / monthlyBudget) * 100 : 0;
-    return { todaySpent, weekSpent, monthSpent, todayIncome, weekIncome, monthIncome, budgetUsage, monthUpiSpent, monthCashSpent, monthUpiIncome, monthCashIncome };
+    return { todaySpent, weekSpent, monthSpent, todayIncome, weekIncome, monthIncome, budgetUsage, monthUpiSpent, monthCashSpent, monthUpiIncome, monthCashIncome, totalUpiSpent, totalCashSpent, totalUpiIncome, totalCashIncome };
   }, [transactions, monthlyBudget]);
 
   type BreakdownPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -116,13 +122,13 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
           <button onClick={() => onPaymentMethodView?.('upi')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">📱 UPI</p>
             <p className="text-xs font-display font-bold text-green-400">
-              {fmt(stats.monthUpiIncome - stats.monthUpiSpent)}
+              {fmt(stats.totalUpiIncome - stats.totalUpiSpent)}
             </p>
           </button>
           <button onClick={() => onPaymentMethodView?.('cash')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💵 Cash</p>
             <p className="text-xs font-display font-bold text-green-400">
-              {fmt(stats.monthCashIncome - stats.monthCashSpent)}
+              {fmt(stats.totalCashIncome - stats.totalCashSpent)}
             </p>
           </button>
         </div>
