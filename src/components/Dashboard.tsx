@@ -100,45 +100,44 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
         </h2>
       </div>
 
-      {/* Spent Row */}
-      <div>
-        <p className="text-[10px] font-semibold text-destructive uppercase tracking-wider mb-1.5">Spent</p>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: 'Today', value: stats.todaySpent },
-            { label: 'This Month', value: stats.monthSpent },
-          ].map(item => (
-            <button
-              key={item.label}
-              onClick={() => onFilterView?.('expense')}
-              className="rounded-lg bg-card px-3 py-2 border border-border text-left active:scale-95 transition-all"
-              style={{ boxShadow: 'var(--shadow-card)' }}
-            >
-              <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">{item.label}</p>
-              <p className="text-sm font-display font-bold text-destructive">{fmt(item.value)}</p>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Monthly Balance Card */}
+      <div className="rounded-2xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Monthly Balance</p>
+        <p className={`text-3xl font-display font-bold ${(stats.monthIncome - stats.monthSpent) >= 0 ? 'text-primary' : 'text-destructive'}`}>
+          {(stats.monthIncome - stats.monthSpent) >= 0 ? '+' : '-'}{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}
+        </p>
 
-      {/* Income Row */}
-      <div>
-        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-1.5">Income</p>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: 'Today', value: stats.todayIncome },
-            { label: 'This Month', value: stats.monthIncome },
-          ].map(item => (
-            <button
-              key={item.label}
-              onClick={() => onFilterView?.('income')}
-              className="rounded-lg bg-card px-3 py-2 border border-border text-left active:scale-95 transition-all"
-              style={{ boxShadow: 'var(--shadow-card)' }}
-            >
-              <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">{item.label}</p>
-              <p className="text-sm font-display font-bold text-primary">{fmt(item.value)}</p>
-            </button>
-          ))}
+        <div className="grid grid-cols-3 gap-2 mt-4">
+          <button
+            onClick={() => onFilterView?.('expense')}
+            className="rounded-xl bg-secondary/80 px-3 py-3 text-center active:scale-95 transition-all"
+          >
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <span className="text-destructive text-[10px]">↘</span>
+              <span className="text-[9px] font-bold text-destructive uppercase tracking-wider">Spent</span>
+            </div>
+            <p className="text-sm font-display font-bold text-destructive">{fmt(stats.monthSpent)}</p>
+          </button>
+          <button
+            onClick={() => onFilterView?.('income')}
+            className="rounded-xl bg-secondary/80 px-3 py-3 text-center active:scale-95 transition-all"
+          >
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <span className="text-primary text-[10px]">↗</span>
+              <span className="text-[9px] font-bold text-primary uppercase tracking-wider">Income</span>
+            </div>
+            <p className="text-sm font-display font-bold text-primary">{fmt(stats.monthIncome)}</p>
+          </button>
+          <button
+            onClick={() => onFilterView?.('all')}
+            className="rounded-xl bg-secondary/80 px-3 py-3 text-center active:scale-95 transition-all"
+          >
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <span className="text-muted-foreground text-[10px]">—</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Net</span>
+            </div>
+            <p className="text-sm font-display font-bold text-foreground">{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}</p>
+          </button>
         </div>
       </div>
 
