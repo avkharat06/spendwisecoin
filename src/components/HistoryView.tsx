@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartphone, Banknote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SwipeableTransaction from './SwipeableTransaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -20,6 +20,7 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'upi' | 'cash'>('all');
   const softDelete = useSoftDeleteTransactions();
   const restore = useRestoreTransactions();
   const [editingTx, setEditingTx] = useState<typeof allTransactions[0] | null>(null);
@@ -29,8 +30,9 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
     if (filter && filter !== 'all') filtered = filtered.filter(tx => tx.type === filter);
     if (categoryFilter) filtered = filtered.filter(tx => tx.category === categoryFilter);
     if (selectedMonth) filtered = filtered.filter(tx => tx.date.startsWith(selectedMonth));
+    if (paymentFilter !== 'all') filtered = filtered.filter(tx => (tx as any).payment_method === paymentFilter);
     return filtered;
-  }, [allTransactions, filter, categoryFilter, selectedMonth]);
+  }, [allTransactions, filter, categoryFilter, selectedMonth, paymentFilter]);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
@@ -165,6 +167,26 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
                 <span className={`text-sm font-medium ${selectedMonth === m ? 'text-primary' : ''}`}>{formatMonth(m)}</span>
               </DropdownMenuItem>
             ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1 px-3 py-2 rounded-xl bg-secondary text-xs font-semibold text-foreground active:scale-95 transition-all">
+              {paymentFilter === 'upi' ? '📱 UPI' : paymentFilter === 'cash' ? '💵 Cash' : '💳 All'}
+              <ChevronDown size={14} className="text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="rounded-xl border-border/50 bg-card p-1.5">
+            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <span className={`text-sm font-medium ${paymentFilter === 'all' ? 'text-primary' : ''}`}>All Methods</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPaymentFilter('upi')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <span className={`text-sm font-medium ${paymentFilter === 'upi' ? 'text-primary' : ''}`}>📱 UPI</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPaymentFilter('cash')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <span className={`text-sm font-medium ${paymentFilter === 'cash' ? 'text-primary' : ''}`}>💵 Cash</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
