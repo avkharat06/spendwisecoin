@@ -23,6 +23,7 @@ interface Transaction {
   date: string;
   note: string | null;
   quantity: number;
+  payment_method?: string;
 }
 
 interface EditTransactionModalProps {
