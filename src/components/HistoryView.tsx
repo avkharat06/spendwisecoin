@@ -30,8 +30,9 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
     if (filter && filter !== 'all') filtered = filtered.filter(tx => tx.type === filter);
     if (categoryFilter) filtered = filtered.filter(tx => tx.category === categoryFilter);
     if (selectedMonth) filtered = filtered.filter(tx => tx.date.startsWith(selectedMonth));
+    if (paymentFilter !== 'all') filtered = filtered.filter(tx => (tx as any).payment_method === paymentFilter);
     return filtered;
-  }, [allTransactions, filter, categoryFilter, selectedMonth]);
+  }, [allTransactions, filter, categoryFilter, selectedMonth, paymentFilter]);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
