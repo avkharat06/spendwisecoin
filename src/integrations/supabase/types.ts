@@ -14,7 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      custom_categories: {
+        Row: {
+          color: string
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          budget_enabled: boolean
+          created_at: string
+          currency: string
+          display_name: string
+          id: string
+          monthly_budget: number
+          show_recent_activity: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_enabled?: boolean
+          created_at?: string
+          currency?: string
+          display_name?: string
+          id?: string
+          monthly_budget?: number
+          show_recent_activity?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_enabled?: boolean
+          created_at?: string
+          currency?: string
+          display_name?: string
+          id?: string
+          monthly_budget?: number
+          show_recent_activity?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          category: string
+          category_color: string
+          category_emoji: string
+          created_at: string
+          date: string
+          deleted_at: string | null
+          id: string
+          is_deleted: boolean
+          merchant: string
+          note: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          category_color?: string
+          category_emoji?: string
+          created_at?: string
+          date?: string
+          deleted_at?: string | null
+          id?: string
+          is_deleted?: boolean
+          merchant?: string
+          note?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          category_color?: string
+          category_emoji?: string
+          created_at?: string
+          date?: string
+          deleted_at?: string | null
+          id?: string
+          is_deleted?: boolean
+          merchant?: string
+          note?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
