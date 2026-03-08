@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useProfile } from '@/lib/store';
 import Dashboard from '@/components/Dashboard';
@@ -27,7 +27,7 @@ const Index = () => {
   const { data: profile } = useProfile();
   const [view, setView] = useState<ViewType>('home');
   const [showAdd, setShowAdd] = useState(false);
-  const [lastBackPress, setLastBackPress] = useState(0);
+  const lastBackPressRef = useRef(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [txFilter, setTxFilter] = useState<'expense' | 'income' | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
@@ -51,12 +51,12 @@ const Index = () => {
         window.history.pushState(null, '', window.location.href);
       } else {
         const now = Date.now();
-        if (now - lastBackPress < 2000) {
+        if (now - lastBackPressRef.current < 2000) {
           window.removeEventListener('popstate', handlePopState);
           window.history.back();
           return;
         }
-        setLastBackPress(now);
+        lastBackPressRef.current = now;
         toast({ title: 'Press back again to exit', duration: 2000 });
         window.history.pushState(null, '', window.location.href);
       }
@@ -69,7 +69,7 @@ const Index = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [view, showAdd, showFeedback, lastBackPress]);
+  }, [view, showAdd, showFeedback]);
 
   const handleLogout = async () => {
     await signOut();

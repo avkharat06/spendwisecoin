@@ -278,6 +278,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);
                 if (longPressTriggered.current) return;
                 if (selectionMode) toggle(tx.id);
+                else setEditingTx(tx);
               };
               const handlePointerLeave = () => {
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);
@@ -303,7 +304,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       <p className="text-xs text-muted-foreground">{tx.category}</p>
                     </div>
                     <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                      {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
+                      {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
                     </p>
                     {!selectionMode && (
                       <button
