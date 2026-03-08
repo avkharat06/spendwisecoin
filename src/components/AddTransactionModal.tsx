@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { X, CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAddTransaction, useAllCategories } from '@/lib/store';
@@ -22,12 +22,14 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [quantity, setQuantity] = useState('1');
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cash'>('upi');
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { toast } = useToast();
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
   const addTransaction = useAddTransaction();
   const categories = useAllCategories();
+  const visibleCategories = useMemo(() => showAllCategories ? categories : categories.slice(0, 5), [categories, showAllCategories]);
 
   const handleSubmit = async () => {
     const amt = Number(amount);
@@ -171,27 +173,39 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
           </div>
 
           {/* Category Grid */}
-          <div className="grid grid-cols-5 gap-2 mb-6">
-            {categories.map((cat, i) => (
+          <div className="grid grid-cols-5 gap-2 mb-2">
+            {visibleCategories.map((cat, i) => (
               <button
                 key={cat.name}
-                onClick={() => setSelectedCat(i)}
+                onClick={() => setSelectedCat(categories.indexOf(cat))}
                 className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 ${
-                  selectedCat === i ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'
+                  selectedCat === categories.indexOf(cat) ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'
                 }`}
               >
                 <span className="text-xl">{cat.emoji}</span>
                 <span className="text-[9px] font-semibold text-muted-foreground truncate w-full text-center px-0.5">{cat.name}</span>
               </button>
             ))}
-            <button
-              onClick={() => setShowAddCategory(true)}
-              className="flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 bg-secondary border border-dashed border-border hover:border-primary/50"
-            >
-              <Plus size={20} className="text-muted-foreground" />
-              <span className="text-[9px] font-semibold text-muted-foreground">New</span>
-            </button>
+            {showAllCategories && (
+              <button
+                onClick={() => setShowAddCategory(true)}
+                className="flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 bg-secondary border border-dashed border-border hover:border-primary/50"
+              >
+                <Plus size={20} className="text-muted-foreground" />
+                <span className="text-[9px] font-semibold text-muted-foreground">New</span>
+              </button>
+            )}
           </div>
+          {categories.length > 5 || !showAllCategories ? (
+            <button
+              onClick={() => setShowAllCategories(!showAllCategories)}
+              className="w-full text-center text-xs font-semibold text-primary py-2 mb-4 active:scale-95 transition-all"
+            >
+              {showAllCategories ? 'Show less' : `See more (${categories.length - 5 + 1}+)`}
+            </button>
+          ) : (
+            <div className="mb-4" />
+          )}
 
           <button
             onClick={handleSubmit}
