@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 interface DashboardProps {
   onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
   onCategoryView?: (category: string) => void;
+  onPaymentMethodView?: (method: 'upi' | 'cash') => void;
 }
 
 const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
