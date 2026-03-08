@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { getActiveUser, signOut, getCurrency, getPrefs } from '@/lib/auth';
-import AuthScreen from '@/components/AuthScreen';
+import { useState } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { useProfile } from '@/lib/store';
 import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
@@ -23,10 +23,10 @@ import { useToast } from '@/hooks/use-toast';
 type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings';
 
 const Index = () => {
-  const [authed, setAuthed] = useState(!!getActiveUser());
+  const { signOut } = useAuth();
+  const { data: profile } = useProfile();
   const [view, setView] = useState<ViewType>('home');
   const [showAdd, setShowAdd] = useState(false);
-  const [refresh, setRefresh] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [txFilter, setTxFilter] = useState<'expense' | 'income' | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
@@ -34,14 +34,8 @@ const Index = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const { toast } = useToast();
 
-  const triggerRefresh = useCallback(() => setRefresh(r => r + 1), []);
-  const user = getActiveUser();
-  const currency = getCurrency();
-  const prefs = getPrefs();
-
-  const handleLogout = () => {
-    signOut();
-    setAuthed(false);
+  const handleLogout = async () => {
+    await signOut();
   };
 
   const handleFilterView = (filter: 'expense' | 'income' | 'all') => {
@@ -63,29 +57,21 @@ const Index = () => {
       toast({ title: 'Please enter your feedback' });
       return;
     }
-    const feedbacks = JSON.parse(localStorage.getItem('spendwise_feedbacks') || '[]');
-    feedbacks.push({ text: feedbackText.trim(), date: new Date().toISOString(), user: user?.email });
-    localStorage.setItem('spendwise_feedbacks', JSON.stringify(feedbacks));
     setFeedbackText('');
     setShowFeedback(false);
     toast({ title: 'Thanks for your feedback! 💚' });
   };
 
   const getInitials = () => {
-    if (!user?.name) return '?';
-    return user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    if (!profile?.display_name) return '?';
+    return profile.display_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  if (!authed) return <AuthScreen onAuth={() => setAuthed(true)} />;
-
   return (
-    <div className="min-h-screen relative">
-      <div className="fixed top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full pointer-events-none overflow-hidden" style={{ background: 'var(--gradient-glow-primary)' }} />
-      <div className="fixed bottom-[-15%] right-[-10%] w-[45%] h-[45%] rounded-full pointer-events-none overflow-hidden" style={{ background: 'var(--gradient-glow-accent)' }} />
-
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-30 glass-strong">
-        <div className="max-w-lg mx-auto flex items-center justify-between px-5 py-3">
+      <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-lg border-b border-border px-5 py-4">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2.5 active:scale-95 transition-all outline-none">
@@ -94,74 +80,76 @@ const Index = () => {
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-bold text-foreground">{user?.name?.split(' ')[0]}</span>
+                <span className="text-sm font-bold text-foreground">{profile?.display_name?.split(' ')[0] || 'User'}</span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48 rounded-2xl border-border/50 bg-card p-1.5">
-              <DropdownMenuItem onClick={() => setView('home')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+            <DropdownMenuContent align="start" className="w-48 rounded-xl border-border/50 bg-card p-1.5">
+              <DropdownMenuItem onClick={() => setView('home')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Home size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Home</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('history')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => setView('history')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Clock size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">History</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('insights')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => setView('insights')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Lightbulb size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Insights</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('settings')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => setView('settings')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Settings size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-xl py-2.5 px-3 cursor-pointer">
+              <DropdownMenuItem onClick={() => setView('deleted')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Deleted History</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border/50" />
-              <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="rounded-xl py-2.5 px-3 cursor-pointer text-destructive focus:text-destructive">
+              <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="rounded-lg py-2.5 px-3 cursor-pointer text-destructive focus:text-destructive">
                 <LogOut size={16} className="mr-2.5" />
                 <span className="text-sm font-medium">Sign Out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <button onClick={() => setShowFeedback(true)} className="active:scale-95 transition-all">
-            <h1 className="text-lg font-black text-gradient">SpendWise</h1>
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowFeedback(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <MessageSquare size={18} />
+            </button>
+            <button
+              onClick={() => setShowAdd(true)}
+              className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+              style={{ boxShadow: 'var(--shadow-glow)' }}
+            >
+              <Plus size={20} />
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
-      <div className="max-w-lg mx-auto px-5 pt-4 pb-24" key={`${view}-${refresh}`}>
-        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} showRecentActivity={prefs.showRecentActivity} budgetEnabled={prefs.budgetEnabled} />}
-        {view === 'history' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} onBack={() => setView('home')} />}
-        {view === 'filtered' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} filter={txFilter} onBack={() => setView('home')} />}
-        {view === 'category' && <HistoryView refresh={refresh} onRefresh={triggerRefresh} categoryFilter={categoryFilter} onBack={() => setView('home')} />}
+      <main className="max-w-md mx-auto px-5 py-5 pb-24 space-y-6 animate-fade-in">
+        {view === 'home' && <Dashboard onFilterView={handleFilterView} onCategoryView={handleCategoryView} />}
+        {view === 'history' && <HistoryView onBack={() => setView('home')} />}
+        {view === 'filtered' && <HistoryView filter={txFilter} onBack={() => setView('home')} />}
+        {view === 'category' && <HistoryView categoryFilter={categoryFilter} onBack={() => setView('home')} />}
         {view === 'insights' && <InsightsView />}
-        {view === 'deleted' && <DeletedHistoryView refresh={refresh} onRefresh={triggerRefresh} onBack={() => setView('home')} />}
-        {view === 'settings' && <SettingsView onBack={() => setView('home')} onRefresh={triggerRefresh} />}
-      </div>
+        {view === 'deleted' && <DeletedHistoryView onBack={() => setView('home')} />}
+        {view === 'settings' && <SettingsView onBack={() => setView('home')} />}
+      </main>
 
-      {/* FAB */}
-      <button
-        onClick={() => setShowAdd(true)}
-        className="fixed bottom-8 right-5 z-50 w-14 h-14 rounded-full gradient-primary glow-primary flex items-center justify-center active:scale-90 transition-all shadow-2xl"
-      >
-        <Plus size={24} className="text-primary-foreground" />
-      </button>
-
-      {showAdd && <AddTransactionModal onClose={() => setShowAdd(false)} onAdded={triggerRefresh} />}
+      {showAdd && <AddTransactionModal onClose={() => setShowAdd(false)} />}
 
       {/* Logout Confirm */}
       <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-        <AlertDialogContent className="rounded-3xl border-border/50 bg-card">
+        <AlertDialogContent className="rounded-2xl border-border/50 bg-card">
           <AlertDialogHeader>
-            <AlertDialogTitle>Sign out?</AlertDialogTitle>
+            <AlertDialogTitle className="font-display">Sign out?</AlertDialogTitle>
             <AlertDialogDescription>Are you sure you want to sign out of SpendWise?</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="rounded-2xl bg-destructive hover:bg-destructive/90" onClick={handleLogout}>Sign Out</AlertDialogAction>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction className="rounded-xl bg-destructive hover:bg-destructive/90" onClick={handleLogout}>Sign Out</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -170,13 +158,13 @@ const Index = () => {
       {showFeedback && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowFeedback(false)} />
-          <div className="relative w-full max-w-lg mx-4 mb-4 sm:mb-0 card-premium rounded-3xl p-6 animate-in slide-in-from-bottom-4">
+          <div className="relative w-full max-w-lg mx-4 mb-4 sm:mb-0 card-premium rounded-2xl p-6 animate-in">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <MessageSquare size={20} className="text-primary" />
-                <h3 className="text-lg font-bold text-foreground">Send Feedback</h3>
+                <h3 className="text-lg font-display font-bold text-foreground">Send Feedback</h3>
               </div>
-              <button onClick={() => setShowFeedback(false)} className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all">
+              <button onClick={() => setShowFeedback(false)} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
                 <X size={16} className="text-muted-foreground" />
               </button>
             </div>
@@ -186,11 +174,11 @@ const Index = () => {
               onChange={e => setFeedbackText(e.target.value)}
               placeholder="Type your feedback here..."
               rows={4}
-              className="w-full rounded-2xl bg-secondary px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 resize-none"
+              className="w-full rounded-xl bg-secondary px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 resize-none"
             />
             <button
               onClick={handleFeedbackSubmit}
-              className="mt-3 w-full py-3 rounded-2xl gradient-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"
+              className="mt-3 w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"
             >
               <Send size={16} />
               Submit Feedback

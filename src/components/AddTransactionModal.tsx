@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { X, CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import { addTransaction, getAllCategories, getCurrency } from '@/lib/auth';
+import { useAddTransaction, useAllCategories } from '@/lib/store';
+import { useProfile } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -10,23 +11,22 @@ import AddCategoryModal from '@/components/AddCategoryModal';
 
 interface AddTransactionModalProps {
   onClose: () => void;
-  onAdded: () => void;
 }
 
-const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => {
+const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [selectedCat, setSelectedCat] = useState(0);
   const [merchant, setMerchant] = useState('');
   const [date, setDate] = useState<Date>(new Date());
   const [showAddCategory, setShowAddCategory] = useState(false);
-  const [catRefresh, setCatRefresh] = useState(0);
   const { toast } = useToast();
-  const currency = getCurrency();
+  const { data: profile } = useProfile();
+  const currency = profile?.currency || '₹';
+  const addTransaction = useAddTransaction();
+  const categories = useAllCategories();
 
-  const categories = getAllCategories();
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const amt = Number(amount);
     if (!amt || amt <= 0) {
       toast({ title: 'Enter a valid amount', variant: 'destructive' });
@@ -37,45 +37,48 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
       toast({ title: 'Select a category', variant: 'destructive' });
       return;
     }
-    addTransaction({
-      amount: amt,
-      type,
-      category: cat.name,
-      categoryEmoji: cat.emoji,
-      categoryColor: cat.color,
-      merchant: merchant || cat.name,
-      date: format(date, 'yyyy-MM-dd'),
-    });
-    toast({ title: `${type === 'income' ? 'Income' : 'Expense'} added!` });
-    onAdded();
-    onClose();
+    try {
+      await addTransaction.mutateAsync({
+        amount: amt,
+        type,
+        category: cat.name,
+        category_emoji: cat.emoji,
+        category_color: cat.color,
+        merchant: merchant || cat.name,
+        date: format(date, 'yyyy-MM-dd'),
+      });
+      toast({ title: `${type === 'income' ? 'Income' : 'Expense'} added!` });
+      onClose();
+    } catch {
+      toast({ title: 'Error adding transaction', variant: 'destructive' });
+    }
   };
 
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60 backdrop-blur-sm" onClick={onClose}>
         <div
-          className="w-full max-w-lg bg-card rounded-t-[40px] border border-border/50 p-6 pb-10 animate-in"
+          className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in"
           onClick={e => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-black text-foreground">Add Transaction</h2>
+            <h2 className="text-xl font-display font-bold text-foreground">Add Transaction</h2>
             <button onClick={onClose} className="p-2 rounded-full bg-secondary active:scale-95 transition-all">
               <X size={18} className="text-muted-foreground" />
             </button>
           </div>
 
           {/* Type Toggle */}
-          <div className="flex rounded-3xl bg-secondary p-1 mb-6">
+          <div className="flex rounded-xl bg-secondary p-1 mb-6">
             <button
               onClick={() => setType('expense')}
-              className={`flex-1 py-3 rounded-3xl text-sm font-bold transition-all ${type === 'expense' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}
+              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === 'expense' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}
             >
               Expense
             </button>
             <button
               onClick={() => setType('income')}
-              className={`flex-1 py-3 rounded-3xl text-sm font-bold transition-all ${type === 'income' ? 'bg-success text-success-foreground' : 'text-muted-foreground'}`}
+              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === 'income' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
             >
               Income
             </button>
@@ -83,13 +86,13 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
 
           {/* Amount */}
           <div className="text-center mb-6">
-            <span className="text-muted-foreground text-2xl font-bold">{currency}</span>
+            <span className="text-muted-foreground text-2xl font-display font-bold">{currency}</span>
             <input
               type="number"
               value={amount}
               onChange={e => setAmount(e.target.value)}
               placeholder="0"
-              className="text-5xl font-black text-foreground bg-transparent text-center w-48 outline-none placeholder:text-muted-foreground/30"
+              className="text-5xl font-display font-bold text-foreground bg-transparent text-center w-48 outline-none placeholder:text-muted-foreground/30"
               autoFocus
             />
           </div>
@@ -100,7 +103,7 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
             value={merchant}
             onChange={e => setMerchant(e.target.value)}
             placeholder="Merchant / Note"
-            className="w-full px-5 py-3.5 rounded-3xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm mb-6"
+            className="w-full px-5 py-3.5 rounded-xl bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:border-primary focus:outline-none transition-all text-sm mb-4"
           />
 
           {/* Date Picker */}
@@ -108,7 +111,7 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
             <PopoverTrigger asChild>
               <button
                 className={cn(
-                  "w-full px-5 py-3.5 rounded-3xl bg-secondary text-sm border border-border focus:border-primary transition-all text-left flex items-center gap-3 mb-6",
+                  "w-full px-5 py-3.5 rounded-xl bg-secondary text-sm border border-border focus:border-primary transition-all text-left flex items-center gap-3 mb-4",
                   !date && "text-muted-foreground"
                 )}
               >
@@ -128,23 +131,22 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
           </Popover>
 
           {/* Category Grid */}
-          <div className="grid grid-cols-5 gap-2 mb-6" key={catRefresh}>
+          <div className="grid grid-cols-5 gap-2 mb-6">
             {categories.map((cat, i) => (
               <button
                 key={cat.name}
                 onClick={() => setSelectedCat(i)}
-                className={`flex flex-col items-center gap-1 py-3 rounded-3xl transition-all active:scale-95 ${
-                  selectedCat === i ? 'bg-primary/20 border border-primary/50' : 'bg-secondary'
+                className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 ${
+                  selectedCat === i ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'
                 }`}
               >
                 <span className="text-xl">{cat.emoji}</span>
                 <span className="text-[9px] font-semibold text-muted-foreground truncate w-full text-center px-0.5">{cat.name}</span>
               </button>
             ))}
-            {/* Add Category Button */}
             <button
               onClick={() => setShowAddCategory(true)}
-              className="flex flex-col items-center gap-1 py-3 rounded-3xl transition-all active:scale-95 bg-secondary border border-dashed border-border hover:border-primary/50"
+              className="flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 bg-secondary border border-dashed border-border hover:border-primary/50"
             >
               <Plus size={20} className="text-muted-foreground" />
               <span className="text-[9px] font-semibold text-muted-foreground">New</span>
@@ -153,9 +155,11 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
 
           <button
             onClick={handleSubmit}
-            className="w-full py-4 rounded-3xl gradient-primary text-primary-foreground font-bold text-base active:scale-95 transition-all glow-primary"
+            disabled={addTransaction.isPending}
+            className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base active:scale-95 transition-all disabled:opacity-50"
+            style={{ boxShadow: 'var(--shadow-glow)' }}
           >
-            Add {type === 'income' ? 'Income' : 'Expense'}
+            {addTransaction.isPending ? 'Adding...' : `Add ${type === 'income' ? 'Income' : 'Expense'}`}
           </button>
         </div>
       </div>
@@ -163,7 +167,6 @@ const AddTransactionModal = ({ onClose, onAdded }: AddTransactionModalProps) => 
       {showAddCategory && (
         <AddCategoryModal
           onClose={() => setShowAddCategory(false)}
-          onAdded={() => setCatRefresh(r => r + 1)}
         />
       )}
     </>

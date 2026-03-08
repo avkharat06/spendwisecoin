@@ -1,55 +1,35 @@
-import { useMemo } from 'react';
-import { getDeletedTransactions, restoreTransactions, permanentlyDeleteFromHistory, deleteTransactions, DeletedTransaction, getCurrency } from '@/lib/auth';
+import { useDeletedTransactions, useRestoreTransactions, usePermanentDeleteTransactions, useProfile } from '@/lib/store';
 import { ArrowLeft, RotateCcw, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface DeletedHistoryViewProps {
-  refresh: number;
-  onRefresh: () => void;
   onBack?: () => void;
 }
 
-const DeletedHistoryView = ({ refresh, onRefresh, onBack }: DeletedHistoryViewProps) => {
-  const deletedTxs = useMemo(() => getDeletedTransactions(), [refresh]);
+const DeletedHistoryView = ({ onBack }: DeletedHistoryViewProps) => {
+  const { data: deletedTxs = [] } = useDeletedTransactions();
+  const { data: profile } = useProfile();
+  const currency = profile?.currency || '₹';
   const { toast } = useToast();
-  const currency = getCurrency();
+  const restoreMut = useRestoreTransactions();
+  const permDelete = usePermanentDeleteTransactions();
 
-  const handleRestore = (tx: DeletedTransaction) => {
-    const { deletedAt, ...original } = tx;
-    restoreTransactions([original]);
-    onRefresh();
+  const handleRestore = async (id: string) => {
+    await restoreMut.mutateAsync([id]);
     toast({ title: 'Transaction restored' });
   };
 
-  const handlePermanentDelete = (tx: DeletedTransaction) => {
-    permanentlyDeleteFromHistory([tx.id]);
-    onRefresh();
-    toast({
-      title: 'Permanently deleted',
-      action: (
-        <button
-          onClick={() => {
-            // Restore the transaction back, then re-delete to put it back in deleted history
-            const { deletedAt, ...original } = tx;
-            restoreTransactions([original]);
-            deleteTransactions([original.id]);
-            onRefresh();
-            toast({ title: 'Restored to deleted history' });
-          }}
-          className="text-xs font-bold text-primary hover:underline px-3 py-1.5 rounded-xl bg-primary/10 active:scale-95 transition-all"
-        >
-          Undo
-        </button>
-      ),
-    });
+  const handlePermanentDelete = async (id: string) => {
+    await permDelete.mutateAsync([id]);
+    toast({ title: 'Permanently deleted' });
   };
 
-  const daysLeft = (deletedAt: number) => {
-    const ms = deletedAt + 30 * 24 * 60 * 60 * 1000 - Date.now();
+  const daysLeft = (deletedAt: string) => {
+    const ms = new Date(deletedAt).getTime() + 30 * 24 * 60 * 60 * 1000 - Date.now();
     return Math.max(1, Math.ceil(ms / (24 * 60 * 60 * 1000)));
   };
 
-  const formatDate = (ts: number) =>
+  const formatDate = (ts: string) =>
     new Date(ts).toLocaleDateString(currency === '₹' ? 'en-IN' : 'en-US', {
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
     });
@@ -58,35 +38,35 @@ const DeletedHistoryView = ({ refresh, onRefresh, onBack }: DeletedHistoryViewPr
     <div className="animate-in pb-4">
       <div className="flex items-center gap-3 mb-4">
         {onBack && (
-          <button onClick={onBack} className="p-2 rounded-2xl bg-secondary active:scale-95 transition-all">
+          <button onClick={onBack} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
             <ArrowLeft size={18} className="text-foreground" />
           </button>
         )}
-        <h2 className="text-2xl font-black text-foreground">Deleted History</h2>
+        <h2 className="text-2xl font-display font-bold text-foreground">Deleted History</h2>
       </div>
 
       <p className="text-xs text-muted-foreground mb-4">Deleted items are kept for 30 days before being permanently removed.</p>
 
       <div className="space-y-2">
         {deletedTxs.map(tx => (
-          <div key={tx.id + tx.deletedAt} className="card-item flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg opacity-60" style={{ backgroundColor: tx.categoryColor + '20' }}>
-              {tx.categoryEmoji}
+          <div key={tx.id} className="card-item flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg opacity-60" style={{ backgroundColor: tx.category_color + '20' }}>
+              {tx.category_emoji}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate opacity-70">{tx.merchant}</p>
+              <p className="text-sm font-medium text-foreground truncate opacity-70">{tx.merchant}</p>
               <p className="text-[10px] text-muted-foreground">
-                Deleted {formatDate(tx.deletedAt)} · {daysLeft(tx.deletedAt)}d left
+                Deleted {formatDate(tx.deleted_at!)} · {daysLeft(tx.deleted_at!)}d left
               </p>
             </div>
-            <p className={`text-sm font-bold opacity-60 ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>
+            <p className={`text-sm font-display font-bold opacity-60 ${tx.type === 'income' ? 'text-primary' : 'text-destructive'}`}>
               {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
             </p>
             <div className="flex gap-1">
-              <button onClick={() => handleRestore(tx)} className="p-2 rounded-xl bg-primary/10 active:scale-95 transition-all">
+              <button onClick={() => handleRestore(tx.id)} className="p-2 rounded-lg bg-primary/10 active:scale-95 transition-all">
                 <RotateCcw size={14} className="text-primary" />
               </button>
-              <button onClick={() => handlePermanentDelete(tx)} className="p-2 rounded-xl bg-destructive/10 active:scale-95 transition-all">
+              <button onClick={() => handlePermanentDelete(tx.id)} className="p-2 rounded-lg bg-destructive/10 active:scale-95 transition-all">
                 <Trash2 size={14} className="text-destructive" />
               </button>
             </div>
