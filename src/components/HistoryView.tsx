@@ -279,7 +279,7 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
                       <p className="text-sm font-medium text-foreground truncate">{tx.merchant}</p>
                       <p className="text-xs text-muted-foreground">{tx.category}</p>
                     </div>
-                    <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-primary' : 'text-destructive'}`}>
+                    <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
                       {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
                     </p>
                     {!selectionMode && (
