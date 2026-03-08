@@ -118,8 +118,27 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
 
       {/* Monthly Breakdown — Donut Chart + Legend */}
       {categoryBreakdown.length > 0 && (
-        <div className="rounded-xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <h3 className="font-display font-semibold text-sm text-muted-foreground mb-4">Monthly Breakdown</h3>
+      <div className="rounded-xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-semibold text-sm text-muted-foreground">
+              {breakdownPeriod === 'daily' ? 'Daily' : breakdownPeriod === 'weekly' ? 'Weekly' : breakdownPeriod === 'yearly' ? 'Yearly' : 'Monthly'} Breakdown
+            </h3>
+            <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
+              {(['daily', 'weekly', 'monthly', 'yearly'] as BreakdownPeriod[]).map(period => (
+                <button
+                  key={period}
+                  onClick={() => setBreakdownPeriod(period)}
+                  className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${
+                    breakdownPeriod === period
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {period.charAt(0).toUpperCase() + period.slice(1, 3)}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             <div className="w-32 h-32 flex-shrink-0">
               <ResponsiveContainer width="100%" height="100%">
