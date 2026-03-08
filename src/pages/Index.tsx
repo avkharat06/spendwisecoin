@@ -110,6 +110,18 @@ const Index = () => {
     return profile.display_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  const allowReload = view === 'home' || view === 'history' || view === 'settings';
+
+  // Prevent pull-to-refresh on non-allowed views
+  useEffect(() => {
+    document.documentElement.style.overscrollBehaviorY = allowReload ? 'auto' : 'contain';
+    document.body.style.overscrollBehaviorY = allowReload ? 'auto' : 'contain';
+    return () => {
+      document.documentElement.style.overscrollBehaviorY = 'auto';
+      document.body.style.overscrollBehaviorY = 'auto';
+    };
+  }, [allowReload]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
