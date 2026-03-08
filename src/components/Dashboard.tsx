@@ -122,7 +122,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
           <button onClick={() => onPaymentMethodView?.('upi')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">📱 UPI</p>
             <p className="text-xs font-display font-bold text-green-400">
-              {fmt(stats.monthUpiIncome - stats.monthUpiSpent)}
+              {fmt(stats.totalUpiIncome - stats.totalUpiSpent)}
             </p>
           </button>
           <button onClick={() => onPaymentMethodView?.('cash')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
