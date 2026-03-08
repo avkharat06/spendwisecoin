@@ -174,14 +174,24 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
           </div>
 
           {/* Category Grid */}
-          <div className="grid grid-cols-5 gap-2 mb-6 max-h-40 overflow-y-auto">
-            {categories.map((cat, i) => (
-              <button key={cat.name} onClick={() => setSelectedCat(i)} className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 ${selectedCat === i ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'}`}>
+          <div className="grid grid-cols-5 gap-2 mb-2">
+            {visibleCategories.map((cat) => (
+              <button key={cat.name} onClick={() => setSelectedCatName(cat.name)} className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all active:scale-95 ${selectedCatName === cat.name ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'}`}>
                 <span className="text-xl">{cat.emoji}</span>
                 <span className="text-[9px] font-semibold text-muted-foreground truncate w-full text-center px-0.5">{cat.name}</span>
               </button>
             ))}
           </div>
+          {categories.length > 5 || !showAllCategories ? (
+            <button
+              onClick={() => setShowAllCategories(!showAllCategories)}
+              className="w-full text-center text-xs font-semibold text-primary py-2 mb-4 active:scale-95 transition-all"
+            >
+              {showAllCategories ? 'Show less' : `See more (${categories.length - 5 + 1}+)`}
+            </button>
+          ) : (
+            <div className="mb-4" />
+          )}
 
           <button onClick={handleSave} disabled={updateTransaction.isPending} className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base active:scale-95 transition-all disabled:opacity-50" style={{ boxShadow: 'var(--shadow-glow)' }}>
             <span className="flex items-center justify-center gap-2"><Save size={18} /> Save Changes</span>
