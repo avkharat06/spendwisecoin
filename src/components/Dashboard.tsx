@@ -313,7 +313,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{tx.merchant}</p>
                   <p className="text-xs text-muted-foreground">
-                    {tx.category} · {new Date(tx.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
+                    {tx.category} · {(tx as any).payment_method === 'upi' ? '📱' : '💵'} · {new Date(tx.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
                 <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
