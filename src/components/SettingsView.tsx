@@ -321,6 +321,36 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
           </div>
         )}
       </div>
+
+      {/* Custom Categories */}
+      {customCategories.length > 0 && (
+        <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <Tag size={18} className="text-primary" />
+            <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">My Categories</h3>
+          </div>
+          <div className="space-y-2">
+            {customCategories.map(cat => (
+              <div key={cat.id} className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-secondary">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg" style={{ backgroundColor: cat.color + '20' }}>
+                  {cat.emoji}
+                </div>
+                <span className="flex-1 text-sm font-medium text-foreground">{cat.name}</span>
+                <button
+                  onClick={() => setEditingCategory({ id: cat.id, name: cat.name, emoji: cat.emoji, color: cat.color })}
+                  className="p-1.5 rounded-lg bg-card hover:bg-card/80 active:scale-95 transition-all"
+                >
+                  <Pencil size={14} className="text-muted-foreground" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {editingCategory && (
+        <EditCategoryModal category={editingCategory} onClose={() => setEditingCategory(null)} />
+      )}
     </div>
   );
 };
