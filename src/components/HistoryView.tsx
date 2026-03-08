@@ -280,8 +280,8 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
             <div className="flex items-center gap-2">
               {selectionMode && (
                 <button onClick={toggleDate} className="active:scale-90 transition-all">
-                  <div className={`w-4.5 h-4.5 rounded-md border-2 flex items-center justify-center transition-all ${allDateSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
-                    {allDateSelected && <div className="w-1.5 h-1.5 rounded-sm bg-primary-foreground" />}
+                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${allDateSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
+                    {allDateSelected && <div className="w-2 h-2 rounded-sm bg-primary-foreground" />}
                   </div>
                 </button>
               )}
