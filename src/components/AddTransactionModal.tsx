@@ -127,7 +127,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
           </div>
 
           {/* Date Picker */}
-          <Popover>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <button
                 className={cn(
@@ -143,7 +143,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(d) => d && setDate(d)}
+                onSelect={(d) => { if (d) { setDate(d); setCalendarOpen(false); } }}
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
               />
