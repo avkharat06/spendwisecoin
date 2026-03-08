@@ -70,6 +70,20 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
   type BreakdownPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
   const [breakdownPeriod, setBreakdownPeriod] = useState<BreakdownPeriod>('monthly');
 
+  type BalancePeriod = 'daily' | 'weekly' | 'monthly';
+  const [balancePeriod, setBalancePeriod] = useState<BalancePeriod>('monthly');
+
+  const balanceStats = useMemo(() => {
+    switch (balancePeriod) {
+      case 'daily':
+        return { spent: stats.todaySpent, income: stats.todayIncome };
+      case 'weekly':
+        return { spent: stats.weekSpent, income: stats.weekIncome };
+      default:
+        return { spent: stats.monthSpent, income: stats.monthIncome };
+    }
+  }, [balancePeriod, stats]);
+
   const categoryBreakdown = useMemo(() => {
     const now = new Date();
     let startDate: Date;
