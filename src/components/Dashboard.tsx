@@ -103,7 +103,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
       {/* Monthly Balance Card */}
       <div className="rounded-2xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Monthly Balance</p>
-        <p className={`text-3xl font-display font-bold ${(stats.monthIncome - stats.monthSpent) >= 0 ? 'text-primary' : 'text-destructive'}`}>
+        <p className={`text-3xl font-display font-bold ${(stats.monthIncome - stats.monthSpent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
           {(stats.monthIncome - stats.monthSpent) >= 0 ? '+' : '-'}{fmt(Math.abs(stats.monthIncome - stats.monthSpent))}
         </p>
 
