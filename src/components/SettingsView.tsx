@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useProfile, useUpdateProfile } from '@/lib/store';
-import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save } from 'lucide-react';
+import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface SettingsViewProps {
   onBack: () => void;

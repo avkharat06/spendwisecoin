@@ -41,6 +41,7 @@ export function useUpdateProfile() {
       monthly_budget?: number;
       budget_enabled?: boolean;
       show_recent_activity?: boolean;
+      avatar_url?: string;
     }) => {
       const { error } = await supabase
         .from('profiles')
