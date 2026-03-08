@@ -253,18 +253,18 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex-1 space-y-2.5">
-              {categoryBreakdown.slice(0, 4).map(cat => (
+            <div className="flex-1 space-y-2.5 max-h-40 overflow-y-auto pr-1">
+              {categoryBreakdown.map(cat => (
                 <button
                   key={cat.name}
                   onClick={() => onCategoryView?.(cat.name)}
                   className="w-full flex items-center justify-between text-sm active:scale-[0.98] transition-all"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-                    <span className="text-foreground">{cat.name}</span>
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                    <span className="text-foreground truncate">{cat.name}</span>
                   </div>
-                  <span className="text-muted-foreground font-display font-semibold">{fmt(cat.amount)}</span>
+                  <span className="text-muted-foreground font-display font-semibold whitespace-nowrap ml-2">{fmt(cat.amount)}</span>
                 </button>
               ))}
             </div>
