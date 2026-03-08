@@ -50,6 +50,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
         merchant: merchant || cat.name,
         date: format(date, 'yyyy-MM-dd'),
         quantity: qty,
+        payment_method: paymentMethod,
       });
       toast({ title: `${type === 'income' ? 'Income' : 'Expense'} added!` });
       onClose();
