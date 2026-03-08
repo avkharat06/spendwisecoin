@@ -9,7 +9,7 @@ interface DashboardProps {
   onPaymentMethodView?: (method: 'upi' | 'cash') => void;
 }
 
-const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
+const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: DashboardProps) => {
   const { data: profile } = useProfile();
   const { data: transactions = [] } = useTransactions();
 
