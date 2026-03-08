@@ -169,6 +169,26 @@ const HistoryView = ({ filter, categoryFilter, onBack }: HistoryViewProps) => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1 px-3 py-2 rounded-xl bg-secondary text-xs font-semibold text-foreground active:scale-95 transition-all">
+              {paymentFilter === 'upi' ? '📱 UPI' : paymentFilter === 'cash' ? '💵 Cash' : '💳 All'}
+              <ChevronDown size={14} className="text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="rounded-xl border-border/50 bg-card p-1.5">
+            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <span className={`text-sm font-medium ${paymentFilter === 'all' ? 'text-primary' : ''}`}>All Methods</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPaymentFilter('upi')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <span className={`text-sm font-medium ${paymentFilter === 'upi' ? 'text-primary' : ''}`}>📱 UPI</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPaymentFilter('cash')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+              <span className={`text-sm font-medium ${paymentFilter === 'cash' ? 'text-primary' : ''}`}>💵 Cash</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Pie Chart Breakdown */}
