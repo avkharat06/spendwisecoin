@@ -107,6 +107,7 @@ export function useAddTransaction() {
       date: string;
       note?: string;
       quantity?: number;
+      payment_method?: string;
     }) => {
       const { error } = await supabase.from('transactions').insert({
         ...tx,
