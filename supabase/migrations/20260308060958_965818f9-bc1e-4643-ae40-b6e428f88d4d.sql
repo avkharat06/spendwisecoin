@@ -1,0 +1,1 @@
+ALTER TABLE public.transactions ADD COLUMN quantity integer NOT NULL DEFAULT 1;
