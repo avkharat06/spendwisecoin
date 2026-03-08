@@ -12,6 +12,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 interface HistoryViewProps {
   filter?: 'expense' | 'income' | 'all';
   categoryFilter?: string;
+  initialPaymentFilter?: 'upi' | 'cash';
   onBack?: () => void;
 }
 
