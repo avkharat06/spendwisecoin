@@ -120,7 +120,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
         </div>
         <div className="flex gap-2 mt-1">
           <button onClick={() => onPaymentMethodView?.('upi')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">📱 UPI</p>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💳 UPI</p>
             <p className="text-xs font-display font-bold text-green-400">
               {fmt(stats.totalUpiIncome - stats.totalUpiSpent)}
             </p>
@@ -178,7 +178,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
         <div className="grid grid-cols-2 gap-2 mt-3">
           <div className="rounded-xl bg-secondary/60 px-3 py-2.5">
             <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-sm">📱</span>
+              <span className="text-sm">💳</span>
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">UPI</span>
             </div>
             <p className="text-xs font-display font-bold text-destructive">-{fmt(stats.monthUpiSpent)}</p>
@@ -317,7 +317,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
                   </p>
                 </div>
                 <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                  {(tx as any).payment_method === 'upi' ? '📱' : '💵'} {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
+                  {(tx as any).payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)} {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
                 </p>
               </div>
             ))}

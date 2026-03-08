@@ -174,7 +174,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-1 px-3 py-2 rounded-xl bg-secondary text-xs font-semibold text-foreground active:scale-95 transition-all">
-              {paymentFilter === 'upi' ? '📱 UPI' : paymentFilter === 'cash' ? '💵 Cash' : '💳 All'}
+              {paymentFilter === 'upi' ? '💳 UPI' : paymentFilter === 'cash' ? '💵 Cash' : '💳 All'}
               <ChevronDown size={14} className="text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
@@ -183,7 +183,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
               <span className={`text-sm font-medium ${paymentFilter === 'all' ? 'text-primary' : ''}`}>All Methods</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setPaymentFilter('upi')} className="rounded-lg py-2.5 px-3 cursor-pointer">
-              <span className={`text-sm font-medium ${paymentFilter === 'upi' ? 'text-primary' : ''}`}>📱 UPI</span>
+              <span className={`text-sm font-medium ${paymentFilter === 'upi' ? 'text-primary' : ''}`}>💳 UPI</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setPaymentFilter('cash')} className="rounded-lg py-2.5 px-3 cursor-pointer">
               <span className={`text-sm font-medium ${paymentFilter === 'cash' ? 'text-primary' : ''}`}>💵 Cash</span>
@@ -303,7 +303,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       <p className="text-xs text-muted-foreground">{tx.category}</p>
                     </div>
                     <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                      {tx.payment_method === 'upi' ? '📱' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
+                      {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
                     </p>
                     {!selectionMode && (
                       <button
