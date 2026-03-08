@@ -34,7 +34,6 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
       toast({ title: 'Enter a valid amount', variant: 'destructive' });
       return;
     }
-    }
     const cat = categories[selectedCat];
     if (!cat) {
       toast({ title: 'Select a category', variant: 'destructive' });
