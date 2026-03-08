@@ -34,6 +34,8 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
     let todayIncome = 0, weekIncome = 0, monthIncome = 0;
     let monthUpiSpent = 0, monthCashSpent = 0;
     let monthUpiIncome = 0, monthCashIncome = 0;
+    let totalUpiSpent = 0, totalCashSpent = 0;
+    let totalUpiIncome = 0, totalCashIncome = 0;
 
     transactions.forEach(tx => {
       const txDate = new Date(tx.date + 'T00:00:00');
@@ -46,6 +48,8 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
           if (pm === 'upi') monthUpiSpent += tx.amount;
           else monthCashSpent += tx.amount;
         }
+        if (pm === 'upi') totalUpiSpent += tx.amount;
+        else totalCashSpent += tx.amount;
       } else {
         if (tx.date === today) todayIncome += tx.amount;
         if (txDate >= weekStart) weekIncome += tx.amount;
@@ -54,11 +58,13 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
           if (pm === 'upi') monthUpiIncome += tx.amount;
           else monthCashIncome += tx.amount;
         }
+        if (pm === 'upi') totalUpiIncome += tx.amount;
+        else totalCashIncome += tx.amount;
       }
     });
 
     const budgetUsage = monthlyBudget > 0 ? (monthSpent / monthlyBudget) * 100 : 0;
-    return { todaySpent, weekSpent, monthSpent, todayIncome, weekIncome, monthIncome, budgetUsage, monthUpiSpent, monthCashSpent, monthUpiIncome, monthCashIncome };
+    return { todaySpent, weekSpent, monthSpent, todayIncome, weekIncome, monthIncome, budgetUsage, monthUpiSpent, monthCashSpent, monthUpiIncome, monthCashIncome, totalUpiSpent, totalCashSpent, totalUpiIncome, totalCashIncome };
   }, [transactions, monthlyBudget]);
 
   type BreakdownPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
