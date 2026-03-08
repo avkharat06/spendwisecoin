@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useProfile } from '@/lib/store';
 import Dashboard from '@/components/Dashboard';
