@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTransactions, useProfile } from '@/lib/store';
 import { AlertTriangle } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -46,10 +46,32 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
     return { todaySpent, weekSpent, monthSpent, monthIncome, budgetUsage };
   }, [transactions, monthlyBudget]);
 
+  type BreakdownPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
+  const [breakdownPeriod, setBreakdownPeriod] = useState<BreakdownPeriod>('monthly');
+
   const categoryBreakdown = useMemo(() => {
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const expenses = transactions.filter(t => t.type === 'expense' && new Date(t.date + 'T00:00:00') >= monthStart);
+    let startDate: Date;
+
+    switch (breakdownPeriod) {
+      case 'daily':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'weekly': {
+        const dayOfWeek = now.getDay();
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      }
+      case 'yearly':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    const expenses = transactions.filter(t => t.type === 'expense' && new Date(t.date + 'T00:00:00') >= startDate);
     const grouped: Record<string, { amount: number; emoji: string; color: string }> = {};
     expenses.forEach(tx => {
       if (!grouped[tx.category]) grouped[tx.category] = { amount: 0, emoji: tx.category_emoji, color: tx.category_color };
@@ -58,7 +80,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
     return Object.entries(grouped)
       .map(([name, data]) => ({ name, ...data }))
       .sort((a, b) => b.amount - a.amount);
-  }, [transactions]);
+  }, [transactions, breakdownPeriod]);
 
   const topCategory = categoryBreakdown[0];
   const recentTx = transactions.slice(0, 5);
@@ -96,8 +118,27 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
 
       {/* Monthly Breakdown — Donut Chart + Legend */}
       {categoryBreakdown.length > 0 && (
-        <div className="rounded-xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <h3 className="font-display font-semibold text-sm text-muted-foreground mb-4">Monthly Breakdown</h3>
+      <div className="rounded-xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-semibold text-sm text-muted-foreground">
+              {breakdownPeriod === 'daily' ? 'Daily' : breakdownPeriod === 'weekly' ? 'Weekly' : breakdownPeriod === 'yearly' ? 'Yearly' : 'Monthly'} Breakdown
+            </h3>
+            <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
+              {(['daily', 'weekly', 'monthly', 'yearly'] as BreakdownPeriod[]).map(period => (
+                <button
+                  key={period}
+                  onClick={() => setBreakdownPeriod(period)}
+                  className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-all ${
+                    breakdownPeriod === period
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {period.charAt(0).toUpperCase() + period.slice(1, 3)}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             <div className="w-32 h-32 flex-shrink-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -152,7 +193,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
           {topCategory && (
             <div className="mt-4 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
               <p className="text-xs text-primary font-medium">
-                💡 You spent the most on <strong>{topCategory.name}</strong> this month — {fmt(topCategory.amount)}
+                💡 You spent the most on <strong>{topCategory.name}</strong> {breakdownPeriod === 'daily' ? 'today' : breakdownPeriod === 'weekly' ? 'this week' : breakdownPeriod === 'yearly' ? 'this year' : 'this month'} — {fmt(topCategory.amount)}
               </p>
             </div>
           )}
