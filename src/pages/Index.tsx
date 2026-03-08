@@ -27,6 +27,7 @@ const Index = () => {
   const { data: profile } = useProfile();
   const [view, setView] = useState<ViewType>('home');
   const [showAdd, setShowAdd] = useState(false);
+  const [lastBackPress, setLastBackPress] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [txFilter, setTxFilter] = useState<'expense' | 'income' | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
@@ -42,7 +43,15 @@ const Index = () => {
         setView('home');
         window.history.pushState(null, '', window.location.href);
       } else {
-        // Push state again to prevent exit
+        const now = Date.now();
+        if (now - lastBackPress < 2000) {
+          // Double back — allow exit
+          window.removeEventListener('popstate', handlePopState);
+          window.history.back();
+          return;
+        }
+        setLastBackPress(now);
+        toast({ title: 'Press back again to exit', duration: 2000 });
         window.history.pushState(null, '', window.location.href);
       }
     };
