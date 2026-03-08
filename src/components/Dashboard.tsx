@@ -6,9 +6,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 interface DashboardProps {
   onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
   onCategoryView?: (category: string) => void;
+  onPaymentMethodView?: (method: 'upi' | 'cash') => void;
 }
 
-const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
+const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: DashboardProps) => {
   const { data: profile } = useProfile();
   const { data: transactions = [] } = useTransactions();
 
@@ -112,18 +113,18 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
           </h2>
         </div>
         <div className="flex gap-2 mt-1">
-          <div className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center">
+          <button onClick={() => onPaymentMethodView?.('upi')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">📱 UPI</p>
             <p className="text-xs font-display font-bold text-green-400">
               {fmt(stats.monthUpiIncome - stats.monthUpiSpent)}
             </p>
-          </div>
-          <div className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center">
+          </button>
+          <button onClick={() => onPaymentMethodView?.('cash')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💵 Cash</p>
             <p className="text-xs font-display font-bold text-green-400">
               {fmt(stats.monthCashIncome - stats.monthCashSpent)}
             </p>
-          </div>
+          </button>
         </div>
       </div>
 
