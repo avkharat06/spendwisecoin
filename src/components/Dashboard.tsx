@@ -123,10 +123,10 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
             className="rounded-xl bg-secondary/80 px-3 py-3 text-center active:scale-95 transition-all"
           >
             <div className="flex items-center justify-center gap-1 mb-1">
-              <span className="text-primary text-[10px]">↗</span>
-              <span className="text-[9px] font-bold text-primary uppercase tracking-wider">Income</span>
+              <span className="text-green-400 text-[10px]">↗</span>
+              <span className="text-[9px] font-bold text-green-400 uppercase tracking-wider">Income</span>
             </div>
-            <p className="text-sm font-display font-bold text-primary">{fmt(stats.monthIncome)}</p>
+            <p className="text-sm font-display font-bold text-green-400">{fmt(stats.monthIncome)}</p>
           </button>
           <button
             onClick={() => onFilterView?.('all')}
