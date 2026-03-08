@@ -20,6 +20,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const [merchant, setMerchant] = useState('');
   const [date, setDate] = useState<Date>(new Date());
   const [quantity, setQuantity] = useState('1');
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cash'>('upi');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const { toast } = useToast();
   const { data: profile } = useProfile();
@@ -49,6 +50,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
         merchant: merchant || cat.name,
         date: format(date, 'yyyy-MM-dd'),
         quantity: qty,
+        payment_method: paymentMethod,
       });
       toast({ title: `${type === 'income' ? 'Income' : 'Expense'} added!` });
       onClose();
@@ -147,6 +149,25 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
               />
             </PopoverContent>
           </Popover>
+
+          {/* Payment Method Toggle */}
+          <div className="mb-4">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Payment Method</label>
+            <div className="flex rounded-xl bg-secondary p-1">
+              <button
+                onClick={() => setPaymentMethod('upi')}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${paymentMethod === 'upi' ? 'bg-accent text-accent-foreground shadow-sm' : 'text-muted-foreground'}`}
+              >
+                📱 UPI
+              </button>
+              <button
+                onClick={() => setPaymentMethod('cash')}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${paymentMethod === 'cash' ? 'bg-accent text-accent-foreground shadow-sm' : 'text-muted-foreground'}`}
+              >
+                💵 Cash
+              </button>
+            </div>
+          </div>
 
           {/* Category Grid */}
           <div className="grid grid-cols-5 gap-2 mb-6">

@@ -93,6 +93,7 @@ export type Database = {
           is_deleted: boolean
           merchant: string
           note: string | null
+          payment_method: string
           quantity: number
           type: string
           updated_at: string
@@ -110,6 +111,7 @@ export type Database = {
           is_deleted?: boolean
           merchant?: string
           note?: string | null
+          payment_method?: string
           quantity?: number
           type: string
           updated_at?: string
@@ -127,6 +129,7 @@ export type Database = {
           is_deleted?: boolean
           merchant?: string
           note?: string | null
+          payment_method?: string
           quantity?: number
           type?: string
           updated_at?: string
