@@ -29,9 +29,11 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
 
   const handleSubmit = async () => {
     const amt = Number(amount);
+    const qty = Math.max(1, parseInt(quantity) || 1);
     if (!amt || amt <= 0) {
       toast({ title: 'Enter a valid amount', variant: 'destructive' });
       return;
+    }
     }
     const cat = categories[selectedCat];
     if (!cat) {
@@ -47,6 +49,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
         category_color: cat.color,
         merchant: merchant || cat.name,
         date: format(date, 'yyyy-MM-dd'),
+        quantity: qty,
       });
       toast({ title: `${type === 'income' ? 'Income' : 'Expense'} added!` });
       onClose();
