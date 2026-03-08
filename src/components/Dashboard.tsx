@@ -46,10 +46,32 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
     return { todaySpent, weekSpent, monthSpent, monthIncome, budgetUsage };
   }, [transactions, monthlyBudget]);
 
+  type BreakdownPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
+  const [breakdownPeriod, setBreakdownPeriod] = useState<BreakdownPeriod>('monthly');
+
   const categoryBreakdown = useMemo(() => {
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const expenses = transactions.filter(t => t.type === 'expense' && new Date(t.date + 'T00:00:00') >= monthStart);
+    let startDate: Date;
+
+    switch (breakdownPeriod) {
+      case 'daily':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'weekly': {
+        const dayOfWeek = now.getDay();
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      }
+      case 'yearly':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    const expenses = transactions.filter(t => t.type === 'expense' && new Date(t.date + 'T00:00:00') >= startDate);
     const grouped: Record<string, { amount: number; emoji: string; color: string }> = {};
     expenses.forEach(tx => {
       if (!grouped[tx.category]) grouped[tx.category] = { amount: 0, emoji: tx.category_emoji, color: tx.category_color };
@@ -58,7 +80,7 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
     return Object.entries(grouped)
       .map(([name, data]) => ({ name, ...data }))
       .sort((a, b) => b.amount - a.amount);
-  }, [transactions]);
+  }, [transactions, breakdownPeriod]);
 
   const topCategory = categoryBreakdown[0];
   const recentTx = transactions.slice(0, 5);
