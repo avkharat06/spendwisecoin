@@ -29,7 +29,29 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const currency = profile?.currency || '₹';
   const addTransaction = useAddTransaction();
   const categories = useAllCategories();
-  const visibleCategories = useMemo(() => showAllCategories ? categories : categories.slice(0, 5), [categories, showAllCategories]);
+  const { data: transactions = [] } = useTransactions();
+
+  // Sort categories by most recent usage
+  const recentSortedCategories = useMemo(() => {
+    const lastUsed = new Map<string, string>();
+    transactions.forEach(tx => {
+      const existing = lastUsed.get(tx.category);
+      if (!existing || tx.date > existing || (tx.date === existing && tx.created_at > (lastUsed.get(tx.category + '_ca') || ''))) {
+        lastUsed.set(tx.category, tx.date);
+        lastUsed.set(tx.category + '_ca', tx.created_at);
+      }
+    });
+    return [...categories].sort((a, b) => {
+      const aDate = lastUsed.get(a.name) || '';
+      const bDate = lastUsed.get(b.name) || '';
+      if (aDate && bDate) return bDate.localeCompare(aDate);
+      if (aDate) return -1;
+      if (bDate) return 1;
+      return 0;
+    });
+  }, [categories, transactions]);
+
+  const visibleCategories = useMemo(() => showAllCategories ? recentSortedCategories : recentSortedCategories.slice(0, 5), [recentSortedCategories, showAllCategories]);
 
   const handleSubmit = async () => {
     const amt = Number(amount);
