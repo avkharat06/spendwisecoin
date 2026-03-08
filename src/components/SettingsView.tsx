@@ -21,6 +21,8 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [budgetValue, setBudgetValue] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync state when profile loads
   useEffect(() => {
