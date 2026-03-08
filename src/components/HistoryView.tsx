@@ -4,6 +4,7 @@ import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartph
 import { useToast } from '@/hooks/use-toast';
 import SwipeableTransaction from './SwipeableTransaction';
 import EditTransactionModal from './EditTransactionModal';
+import TransactionDetailModal from './TransactionDetailModal';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -25,6 +26,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const softDelete = useSoftDeleteTransactions();
   const restore = useRestoreTransactions();
   const [editingTx, setEditingTx] = useState<typeof allTransactions[0] | null>(null);
+  const [viewingTx, setViewingTx] = useState<typeof allTransactions[0] | null>(null);
 
   const transactions = useMemo(() => {
     let filtered = allTransactions;
@@ -278,7 +280,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);
                 if (longPressTriggered.current) return;
                 if (selectionMode) toggle(tx.id);
-                else setEditingTx(tx);
+                else setViewingTx(tx);
               };
               const handlePointerLeave = () => {
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);
@@ -329,6 +331,13 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         </div>
       )}
 
+      {viewingTx && (
+        <TransactionDetailModal
+          transaction={viewingTx}
+          onClose={() => setViewingTx(null)}
+          onEdit={() => { setEditingTx(viewingTx); setViewingTx(null); }}
+        />
+      )}
       {editingTx && <EditTransactionModal transaction={editingTx} onClose={() => setEditingTx(null)} />}
     </div>
   );
