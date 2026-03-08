@@ -8,13 +8,24 @@ export function useProfile() {
   return useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
+      // Try to get existing profile
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user!.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (data) return data;
+
+      // Profile doesn't exist — create one
+      const displayName = user!.user_metadata?.display_name || '';
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert({ user_id: user!.id, display_name: displayName })
+        .select()
+        .single();
+      if (insertError) throw insertError;
+      return newProfile;
     },
     enabled: !!user,
   });
