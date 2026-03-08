@@ -1,0 +1,1 @@
+CREATE POLICY "Users can update own categories" ON public.custom_categories FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
