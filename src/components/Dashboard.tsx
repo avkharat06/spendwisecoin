@@ -147,6 +147,15 @@ const Dashboard = ({ onFilterView, onCategoryView }: DashboardProps) => {
               ))}
             </div>
           </div>
+
+          {/* Top spending insight — inside pie chart card */}
+          {topCategory && (
+            <div className="mt-4 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
+              <p className="text-xs text-primary font-medium">
+                💡 You spent the most on <strong>{topCategory.name}</strong> this month — {fmt(topCategory.amount)}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
