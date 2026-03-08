@@ -183,7 +183,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
               <span className={`text-sm font-medium ${paymentFilter === 'all' ? 'text-primary' : ''}`}>All Methods</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setPaymentFilter('upi')} className="rounded-lg py-2.5 px-3 cursor-pointer">
-              <span className={`text-sm font-medium ${paymentFilter === 'upi' ? 'text-primary' : ''}`}>📱 UPI</span>
+              <span className={`text-sm font-medium ${paymentFilter === 'upi' ? 'text-primary' : ''}`}><span className={`text-sm font-medium ${paymentFilter === 'upi' ? 'text-primary' : ''}`}>💳 UPI</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setPaymentFilter('cash')} className="rounded-lg py-2.5 px-3 cursor-pointer">
               <span className={`text-sm font-medium ${paymentFilter === 'cash' ? 'text-primary' : ''}`}>💵 Cash</span>
