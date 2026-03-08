@@ -6,55 +6,55 @@
 
 @layer base {
   :root {
-    --background: 148 47% 96%;
-    --foreground: 164 28% 14%;
+    --background: 213 45% 11%;
+    --foreground: 195 50% 94%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 164 28% 14%;
+    --card: 213 38% 17%;
+    --card-foreground: 195 50% 94%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 164 28% 14%;
+    --popover: 213 38% 19%;
+    --popover-foreground: 195 50% 94%;
 
-    --primary: 163 100% 39%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 199 91% 64%;
+    --primary-foreground: 213 45% 11%;
 
-    --secondary: 148 40% 92%;
-    --secondary-foreground: 164 28% 14%;
+    --secondary: 213 35% 22%;
+    --secondary-foreground: 195 40% 85%;
 
-    --muted: 148 30% 93%;
-    --muted-foreground: 164 15% 40%;
+    --muted: 213 30% 20%;
+    --muted-foreground: 195 20% 55%;
 
-    --accent: 148 40% 90%;
-    --accent-foreground: 163 100% 30%;
+    --accent: 199 60% 25%;
+    --accent-foreground: 199 91% 75%;
 
     --destructive: 0 72% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 195 50% 94%;
 
-    --success: 163 100% 39%;
-    --success-foreground: 0 0% 100%;
+    --success: 163 80% 45%;
+    --success-foreground: 213 45% 11%;
 
-    --border: 148 53% 86%;
-    --input: 148 53% 86%;
-    --ring: 163 100% 39%;
+    --border: 213 30% 24%;
+    --input: 213 30% 24%;
+    --ring: 199 91% 64%;
 
     --radius: 0.75rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(163, 100%, 39%), hsl(152, 70%, 45%));
-    --gradient-glow-primary: radial-gradient(circle, hsla(163, 100%, 39%, 0.1) 0%, transparent 70%);
-    --gradient-glow-accent: radial-gradient(circle, hsla(152, 70%, 45%, 0.08) 0%, transparent 70%);
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(148, 40%, 98%));
+    --gradient-primary: linear-gradient(135deg, hsl(199, 91%, 64%), hsl(187, 80%, 50%));
+    --gradient-glow-primary: radial-gradient(circle, hsla(199, 91%, 64%, 0.15) 0%, transparent 70%);
+    --gradient-glow-accent: radial-gradient(circle, hsla(187, 80%, 50%, 0.12) 0%, transparent 70%);
+    --gradient-card: linear-gradient(145deg, hsl(213, 38%, 19%), hsl(213, 38%, 15%));
 
-    --shadow-glow: 0 0 30px hsla(163, 100%, 39%, 0.12);
-    --shadow-card: 0 4px 20px hsla(164, 28%, 14%, 0.06);
+    --shadow-glow: 0 0 30px hsla(199, 91%, 64%, 0.15);
+    --shadow-card: 0 4px 24px hsla(213, 45%, 5%, 0.5);
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 164 28% 14%;
-    --sidebar-primary: 163 100% 39%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 148 40% 92%;
-    --sidebar-accent-foreground: 164 28% 14%;
-    --sidebar-border: 148 53% 86%;
-    --sidebar-ring: 163 100% 39%;
+    --sidebar-background: 213 38% 17%;
+    --sidebar-foreground: 195 40% 85%;
+    --sidebar-primary: 199 91% 64%;
+    --sidebar-primary-foreground: 213 45% 11%;
+    --sidebar-accent: 213 35% 22%;
+    --sidebar-accent-foreground: 195 40% 85%;
+    --sidebar-border: 213 30% 24%;
+    --sidebar-ring: 199 91% 64%;
   }
 }
 
