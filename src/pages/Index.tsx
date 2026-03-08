@@ -31,6 +31,7 @@ const Index = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [txFilter, setTxFilter] = useState<'expense' | 'income' | 'all'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState<'upi' | 'cash' | undefined>(undefined);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const { toast } = useToast();
