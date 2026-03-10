@@ -28,7 +28,7 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
   const addTransaction = useAddTransaction();
-  const categories = useAllCategories();
+  const categories = useCategoriesByType(type);
   const { data: transactions = [] } = useTransactions();
 
   // Sort categories by most recent usage
