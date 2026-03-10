@@ -244,6 +244,15 @@ export function useAllCategories() {
   ];
 }
 
+export function useCategoriesByType(type: 'expense' | 'income') {
+  const { data: custom } = useCustomCategories();
+  const defaults = type === 'expense' ? DEFAULT_EXPENSE_CATEGORIES : DEFAULT_INCOME_CATEGORIES;
+  return [
+    ...defaults,
+    ...(custom ?? []).map(c => ({ name: c.name, emoji: c.emoji, color: c.color })),
+  ];
+}
+
 export function useAddCustomCategory() {
   const { user } = useAuth();
   const qc = useQueryClient();
