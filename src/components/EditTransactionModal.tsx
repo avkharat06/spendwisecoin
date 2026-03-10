@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { X, CalendarIcon, Save } from 'lucide-react';
 import { format } from 'date-fns';
-import { useUpdateTransaction, useAllCategories, useProfile, useTransactions } from '@/lib/store';
+import { useUpdateTransaction, useCategoriesByType, useProfile, useTransactions } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -45,7 +45,7 @@ const EditTransactionModal = ({ transaction, onClose }: EditTransactionModalProp
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
   const updateTransaction = useUpdateTransaction();
-  const categories = useAllCategories();
+  const categories = useCategoriesByType(type);
   const { data: transactions = [] } = useTransactions();
 
   // Sort categories by most recent usage

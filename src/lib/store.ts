@@ -196,18 +196,29 @@ export function usePermanentDeleteTransactions() {
 }
 
 // ── Categories ──
-export const DEFAULT_CATEGORIES = [
+export const DEFAULT_EXPENSE_CATEGORIES = [
   { name: 'Food', emoji: '🍔', color: '#F59E0B' },
   { name: 'Transport', emoji: '🚗', color: '#3B82F6' },
   { name: 'Shopping', emoji: '🛍️', color: '#EC4899' },
   { name: 'Bills', emoji: '📱', color: '#EF4444' },
   { name: 'Health', emoji: '💊', color: '#10B981' },
   { name: 'Entertainment', emoji: '🎮', color: '#8B5CF6' },
+  { name: 'Other', emoji: '📦', color: '#6B7280' },
+];
+
+export const DEFAULT_INCOME_CATEGORIES = [
   { name: 'Salary', emoji: '💰', color: '#10B981' },
   { name: 'Freelance', emoji: '💻', color: '#06B6D4' },
   { name: 'Investment', emoji: '📈', color: '#F97316' },
+  { name: 'Loan', emoji: '🏦', color: '#3B82F6' },
+  { name: 'Business', emoji: '💼', color: '#8B5CF6' },
+  { name: 'Rental', emoji: '🏠', color: '#EC4899' },
+  { name: 'Gift', emoji: '🎁', color: '#F43F5E' },
+  { name: 'Refund', emoji: '🔄', color: '#14B8A6' },
   { name: 'Other', emoji: '📦', color: '#6B7280' },
 ];
+
+export const DEFAULT_CATEGORIES = [...DEFAULT_EXPENSE_CATEGORIES, ...DEFAULT_INCOME_CATEGORIES];
 
 export function useCustomCategories() {
   const { user } = useAuth();
@@ -229,6 +240,15 @@ export function useAllCategories() {
   const { data: custom } = useCustomCategories();
   return [
     ...DEFAULT_CATEGORIES,
+    ...(custom ?? []).map(c => ({ name: c.name, emoji: c.emoji, color: c.color })),
+  ];
+}
+
+export function useCategoriesByType(type: 'expense' | 'income') {
+  const { data: custom } = useCustomCategories();
+  const defaults = type === 'expense' ? DEFAULT_EXPENSE_CATEGORIES : DEFAULT_INCOME_CATEGORIES;
+  return [
+    ...defaults,
     ...(custom ?? []).map(c => ({ name: c.name, emoji: c.emoji, color: c.color })),
   ];
 }
