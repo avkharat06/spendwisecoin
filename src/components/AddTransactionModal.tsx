@@ -101,13 +101,13 @@ const AddTransactionModal = ({ onClose }: AddTransactionModalProps) => {
           {/* Type Toggle */}
           <div className="flex rounded-xl bg-secondary p-1 mb-6">
             <button
-              onClick={() => setType('expense')}
+              onClick={() => { setType('expense'); setSelectedCatName(null); setShowAllCategories(false); }}
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === 'expense' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}
             >
               Expense
             </button>
             <button
-              onClick={() => setType('income')}
+              onClick={() => { setType('income'); setSelectedCatName(null); setShowAllCategories(false); }}
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === 'income' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
             >
               Income
