@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useCallback } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
 import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartphone, Banknote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import SwipeableTransaction from './SwipeableTransaction';
+
 import EditTransactionModal from './EditTransactionModal';
 import TransactionDetailModal from './TransactionDetailModal';
 import {
@@ -316,8 +316,8 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);
               };
               return (
-                <SwipeableTransaction key={tx.id} onDelete={() => handleSingleDelete(tx.id)}>
-                  <div
+                <div
+                    key={tx.id}
                     onPointerDown={handlePointerDown}
                     onPointerUp={handlePointerUp}
                     onPointerLeave={handlePointerLeave}
@@ -349,7 +349,6 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       </button>
                     )}
                   </div>
-                </SwipeableTransaction>
               );
             })}
           </div>
