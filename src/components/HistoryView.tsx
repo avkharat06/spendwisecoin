@@ -316,8 +316,8 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                 if (longPressTimer.current) clearTimeout(longPressTimer.current);
               };
               return (
-                <SwipeableTransaction key={tx.id} onDelete={() => handleSingleDelete(tx.id)}>
-                  <div
+                <div
+                    key={tx.id}
                     onPointerDown={handlePointerDown}
                     onPointerUp={handlePointerUp}
                     onPointerLeave={handlePointerLeave}
@@ -349,7 +349,6 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       </button>
                     )}
                   </div>
-                </SwipeableTransaction>
               );
             })}
           </div>
