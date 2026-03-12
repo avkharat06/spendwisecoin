@@ -136,6 +136,26 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
 
   const fmt = (n: number) => currency + Math.abs(n).toLocaleString(currency === '₹' ? 'en-IN' : 'en-US');
 
+  const showRunningBalance = (profile as any)?.show_running_balance !== false;
+
+  // Compute running balance: all transactions sorted by date desc, running from bottom up
+  const runningBalances = useMemo(() => {
+    if (!showRunningBalance) return new Map<string, number>();
+    // Sort all filtered transactions by date asc, then created_at asc for running total
+    const sorted = [...transactions].sort((a, b) => {
+      const dateCompare = a.date.localeCompare(b.date);
+      if (dateCompare !== 0) return dateCompare;
+      return a.created_at.localeCompare(b.created_at);
+    });
+    const balances = new Map<string, number>();
+    let running = 0;
+    sorted.forEach(tx => {
+      running += tx.type === 'income' ? tx.amount : -tx.amount;
+      balances.set(tx.id, running);
+    });
+    return balances;
+  }, [transactions, showRunningBalance]);
+
   const title = categoryFilter ? categoryFilter : filter === 'expense' ? 'Expenses' : filter === 'income' ? 'Income' : 'History';
 
   return (
@@ -335,9 +355,16 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       <p className="text-sm font-medium text-foreground truncate">{tx.merchant}</p>
                       <p className="text-xs text-muted-foreground">{tx.category}</p>
                     </div>
-                    <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                      {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
-                    </p>
+                    <div className="text-right">
+                      <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
+                        {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
+                      </p>
+                      {showRunningBalance && runningBalances.has(tx.id) && (
+                        <p className={`text-[10px] font-display font-semibold ${runningBalances.get(tx.id)! >= 0 ? 'text-muted-foreground' : 'text-destructive/70'}`}>
+                          Bal: {runningBalances.get(tx.id)! >= 0 ? '' : '-'}{fmt(runningBalances.get(tx.id)!)}
+                        </p>
+                      )}
+                    </div>
                     {!selectionMode && (
                       <button
                         onPointerDown={e => e.stopPropagation()}
