@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN show_running_balance boolean NOT NULL DEFAULT true;
