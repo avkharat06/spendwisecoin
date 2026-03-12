@@ -73,7 +73,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
     toast({ title: 'Budget updated!' });
   };
 
-  const handleToggle = async (key: 'budget_enabled' | 'show_recent_activity', value: boolean) => {
+  const handleToggle = async (key: 'budget_enabled' | 'show_recent_activity' | 'show_running_balance', value: boolean) => {
     await updateProfile.mutateAsync({ [key]: value });
   };
 
