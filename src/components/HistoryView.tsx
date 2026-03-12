@@ -136,6 +136,26 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
 
   const fmt = (n: number) => currency + Math.abs(n).toLocaleString(currency === '₹' ? 'en-IN' : 'en-US');
 
+  const showRunningBalance = (profile as any)?.show_running_balance !== false;
+
+  // Compute running balance: all transactions sorted by date desc, running from bottom up
+  const runningBalances = useMemo(() => {
+    if (!showRunningBalance) return new Map<string, number>();
+    // Sort all filtered transactions by date asc, then created_at asc for running total
+    const sorted = [...transactions].sort((a, b) => {
+      const dateCompare = a.date.localeCompare(b.date);
+      if (dateCompare !== 0) return dateCompare;
+      return a.created_at.localeCompare(b.created_at);
+    });
+    const balances = new Map<string, number>();
+    let running = 0;
+    sorted.forEach(tx => {
+      running += tx.type === 'income' ? tx.amount : -tx.amount;
+      balances.set(tx.id, running);
+    });
+    return balances;
+  }, [transactions, showRunningBalance]);
+
   const title = categoryFilter ? categoryFilter : filter === 'expense' ? 'Expenses' : filter === 'income' ? 'Income' : 'History';
 
   return (
