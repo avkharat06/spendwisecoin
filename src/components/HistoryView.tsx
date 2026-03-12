@@ -355,9 +355,16 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       <p className="text-sm font-medium text-foreground truncate">{tx.merchant}</p>
                       <p className="text-xs text-muted-foreground">{tx.category}</p>
                     </div>
-                    <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                      {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
-                    </p>
+                    <div className="text-right">
+                      <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
+                        {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
+                      </p>
+                      {showRunningBalance && runningBalances.has(tx.id) && (
+                        <p className={`text-[10px] font-display font-semibold ${runningBalances.get(tx.id)! >= 0 ? 'text-muted-foreground' : 'text-destructive/70'}`}>
+                          Bal: {runningBalances.get(tx.id)! >= 0 ? '' : '-'}{fmt(runningBalances.get(tx.id)!)}
+                        </p>
+                      )}
+                    </div>
                     {!selectionMode && (
                       <button
                         onPointerDown={e => e.stopPropagation()}

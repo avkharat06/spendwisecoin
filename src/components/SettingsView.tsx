@@ -284,6 +284,23 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
         </div>
       </div>
 
+      {/* Running Balance Toggle */}
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Wallet size={18} className={(profile as any)?.show_running_balance !== false ? 'text-primary' : 'text-muted-foreground'} />
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Running Balance</h3>
+              <p className="text-xs text-muted-foreground">Show balance per transaction in history</p>
+            </div>
+          </div>
+          <Switch
+            checked={(profile as any)?.show_running_balance !== false}
+            onCheckedChange={v => handleToggle('show_running_balance' as any, v)}
+          />
+        </div>
+      </div>
+
       {/* Monthly Budget Toggle */}
       <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center justify-between mb-3">
