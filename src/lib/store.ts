@@ -203,6 +203,7 @@ export const DEFAULT_EXPENSE_CATEGORIES = [
   { name: 'Bills', emoji: '📱', color: '#EF4444' },
   { name: 'Health', emoji: '💊', color: '#10B981' },
   { name: 'Entertainment', emoji: '🎮', color: '#8B5CF6' },
+  { name: 'Investing', emoji: '📊', color: '#F97316' },
   { name: 'Other', emoji: '📦', color: '#6B7280' },
 ];
 
