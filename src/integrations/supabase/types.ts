@@ -52,6 +52,7 @@ export type Database = {
           monthly_budget: number
           show_recent_activity: boolean
           show_running_balance: boolean
+          statement_downloads: number
           updated_at: string
           user_id: string
         }
@@ -65,6 +66,7 @@ export type Database = {
           monthly_budget?: number
           show_recent_activity?: boolean
           show_running_balance?: boolean
+          statement_downloads?: number
           updated_at?: string
           user_id: string
         }
@@ -78,6 +80,7 @@ export type Database = {
           monthly_budget?: number
           show_recent_activity?: boolean
           show_running_balance?: boolean
+          statement_downloads?: number
           updated_at?: string
           user_id?: string
         }

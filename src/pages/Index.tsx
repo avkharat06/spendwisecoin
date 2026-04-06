@@ -5,9 +5,10 @@ import Dashboard from '@/components/Dashboard';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import HistoryView from '@/components/HistoryView';
 import InsightsView from '@/components/InsightsView';
+import DownloadStatementView from '@/components/DownloadStatementView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
 import SettingsView from '@/components/SettingsView';
-import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send } from 'lucide-react';
+import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send, Download } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -20,7 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings';
+type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings' | 'download-statement';
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -158,6 +159,10 @@ const Index = () => {
                 <Lightbulb size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Insights</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigateTo('download-statement')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+                <Download size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">Download Statement</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigateTo('settings')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Settings size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Settings</span>
@@ -197,6 +202,7 @@ const Index = () => {
         {view === 'category' && <HistoryView categoryFilter={categoryFilter} onBack={() => setView('home')} />}
         {view === 'insights' && <InsightsView />}
         {view === 'deleted' && <DeletedHistoryView onBack={() => setView('home')} />}
+        {view === 'download-statement' && <DownloadStatementView onBack={() => setView('home')} />}
         {view === 'settings' && <SettingsView onBack={() => setView('home')} />}
       </main>
 
