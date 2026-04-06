@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ArrowLeft, Search, SlidersHorizontal, X, Download, Loader2, Calendar } from 'lucide-react';
-import { useTransactions, useProfile, useAllCategories, useIncrementStatementDownloads } from '@/lib/store';
+import { useTransactions, useProfile, useAllCategories } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
