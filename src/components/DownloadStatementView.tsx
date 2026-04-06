@@ -80,21 +80,9 @@ const DownloadStatementView = ({ onBack }: Props) => {
 
   const currency = profile?.currency || '₹';
 
+  const fmtAmount = (n: number) => n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
   const handleDownload = useCallback(async () => {
-    // Check subscription / free download limit
-    const downloads = (profile as any)?.statement_downloads ?? 0;
-    // TODO: Check subscriptions table when it exists
-    const isSubscribed = false;
-
-    if (!isSubscribed && downloads >= 1) {
-      toast({
-        title: 'Free download used',
-        description: 'You have used your free download. Upgrade to Premium for unlimited downloads.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     if (filtered.length === 0) {
       toast({ title: 'No transactions to download' });
       return;
