@@ -131,14 +131,14 @@ const DownloadStatementView = ({ onBack }: Props) => {
       doc.setFont('helvetica', 'normal');
       let sy = 70;
       doc.setTextColor(34, 139, 34);
-      doc.text(`Total Income: ${currency}${totalIncome.toLocaleString()}`, 14, sy);
+      doc.text(`Total Income: ${currency}${fmtAmount(totalIncome)}`, 14, sy);
       doc.setTextColor(220, 53, 69);
-      doc.text(`Total Expenses: ${currency}${totalExpense.toLocaleString()}`, 14, sy + 6);
+      doc.text(`Total Expenses: ${currency}${fmtAmount(totalExpense)}`, 14, sy + 6);
       doc.setTextColor(59, 130, 246);
-      doc.text(`Net Balance: ${currency}${(totalIncome - totalExpense).toLocaleString()}`, 14, sy + 12);
+      doc.text(`Net Balance: ${currency}${fmtAmount(totalIncome - totalExpense)}`, 14, sy + 12);
       doc.setTextColor(0, 0, 0);
-      doc.text(`Cash Balance: ${currency}${cashBalance.toLocaleString()}`, 14, sy + 18);
-      doc.text(`UPI Balance: ${currency}${upiBalance.toLocaleString()}`, 14, sy + 24);
+      doc.text(`Cash Balance: ${currency}${fmtAmount(cashBalance)}`, 14, sy + 18);
+      doc.text(`UPI Balance: ${currency}${fmtAmount(upiBalance)}`, 14, sy + 24);
 
       doc.line(14, sy + 28, pageWidth - 14, sy + 28);
 
