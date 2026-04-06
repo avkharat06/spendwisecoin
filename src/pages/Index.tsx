@@ -202,6 +202,7 @@ const Index = () => {
         {view === 'category' && <HistoryView categoryFilter={categoryFilter} onBack={() => setView('home')} />}
         {view === 'insights' && <InsightsView />}
         {view === 'deleted' && <DeletedHistoryView onBack={() => setView('home')} />}
+        {view === 'download-statement' && <DownloadStatementView onBack={() => setView('home')} />}
         {view === 'settings' && <SettingsView onBack={() => setView('home')} />}
       </main>
 
