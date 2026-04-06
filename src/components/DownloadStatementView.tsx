@@ -23,7 +23,7 @@ const DownloadStatementView = ({ onBack }: Props) => {
   const { data: transactions = [] } = useTransactions();
   const { data: profile } = useProfile();
   const allCategories = useAllCategories();
-  const incrementDownloads = useIncrementStatementDownloads();
+  
   const { toast } = useToast();
 
   const [search, setSearch] = useState('');
