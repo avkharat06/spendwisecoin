@@ -189,11 +189,6 @@ const DownloadStatementView = ({ onBack }: Props) => {
       const dateStr = format(new Date(), 'yyyyMMdd');
       doc.save(`SpendWise_Statement_${userName}_${dateStr}.pdf`);
 
-      // Increment download count for free users
-      if (!isSubscribed) {
-        await incrementDownloads.mutateAsync();
-      }
-
       toast({ title: 'Statement downloaded successfully ✓' });
     } catch (err) {
       console.error(err);
