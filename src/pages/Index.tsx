@@ -159,6 +159,10 @@ const Index = () => {
                 <Lightbulb size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Insights</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigateTo('download-statement')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+                <Download size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">Download Statement</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigateTo('settings')} className="rounded-lg py-2.5 px-3 cursor-pointer">
                 <Settings size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Settings</span>
