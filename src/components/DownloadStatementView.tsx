@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ArrowLeft, Search, SlidersHorizontal, X, Download, Loader2, Calendar } from 'lucide-react';
-import { useTransactions, useProfile, useAllCategories, useIncrementStatementDownloads } from '@/lib/store';
+import { useTransactions, useProfile, useAllCategories } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 import { format, isWithinInterval, parseISO } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -23,7 +23,7 @@ const DownloadStatementView = ({ onBack }: Props) => {
   const { data: transactions = [] } = useTransactions();
   const { data: profile } = useProfile();
   const allCategories = useAllCategories();
-  const incrementDownloads = useIncrementStatementDownloads();
+  
   const { toast } = useToast();
 
   const [search, setSearch] = useState('');
@@ -80,21 +80,9 @@ const DownloadStatementView = ({ onBack }: Props) => {
 
   const currency = profile?.currency || '₹';
 
+  const fmtAmount = (n: number) => n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
   const handleDownload = useCallback(async () => {
-    // Check subscription / free download limit
-    const downloads = (profile as any)?.statement_downloads ?? 0;
-    // TODO: Check subscriptions table when it exists
-    const isSubscribed = false;
-
-    if (!isSubscribed && downloads >= 1) {
-      toast({
-        title: 'Free download used',
-        description: 'You have used your free download. Upgrade to Premium for unlimited downloads.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     if (filtered.length === 0) {
       toast({ title: 'No transactions to download' });
       return;
@@ -143,14 +131,14 @@ const DownloadStatementView = ({ onBack }: Props) => {
       doc.setFont('helvetica', 'normal');
       let sy = 70;
       doc.setTextColor(34, 139, 34);
-      doc.text(`Total Income: ${currency}${totalIncome.toLocaleString()}`, 14, sy);
+      doc.text(`Total Income: ${currency}${fmtAmount(totalIncome)}`, 14, sy);
       doc.setTextColor(220, 53, 69);
-      doc.text(`Total Expenses: ${currency}${totalExpense.toLocaleString()}`, 14, sy + 6);
+      doc.text(`Total Expenses: ${currency}${fmtAmount(totalExpense)}`, 14, sy + 6);
       doc.setTextColor(59, 130, 246);
-      doc.text(`Net Balance: ${currency}${(totalIncome - totalExpense).toLocaleString()}`, 14, sy + 12);
+      doc.text(`Net Balance: ${currency}${fmtAmount(totalIncome - totalExpense)}`, 14, sy + 12);
       doc.setTextColor(0, 0, 0);
-      doc.text(`Cash Balance: ${currency}${cashBalance.toLocaleString()}`, 14, sy + 18);
-      doc.text(`UPI Balance: ${currency}${upiBalance.toLocaleString()}`, 14, sy + 24);
+      doc.text(`Cash Balance: ${currency}${fmtAmount(cashBalance)}`, 14, sy + 18);
+      doc.text(`UPI Balance: ${currency}${fmtAmount(upiBalance)}`, 14, sy + 24);
 
       doc.line(14, sy + 28, pageWidth - 14, sy + 28);
 
@@ -161,7 +149,7 @@ const DownloadStatementView = ({ onBack }: Props) => {
         `${tx.category_emoji} ${tx.category}`,
         tx.payment_method.toUpperCase(),
         tx.type === 'income' ? 'Income' : 'Expense',
-        `${tx.type === 'expense' ? '-' : '+'}${currency}${Number(tx.amount).toLocaleString()}`,
+        `${tx.type === 'expense' ? '-' : '+'}${currency}${fmtAmount(Number(tx.amount))}`,
       ]);
 
       autoTable(doc, {
@@ -201,11 +189,6 @@ const DownloadStatementView = ({ onBack }: Props) => {
       const dateStr = format(new Date(), 'yyyyMMdd');
       doc.save(`SpendWise_Statement_${userName}_${dateStr}.pdf`);
 
-      // Increment download count for free users
-      if (!isSubscribed) {
-        await incrementDownloads.mutateAsync();
-      }
-
       toast({ title: 'Statement downloaded successfully ✓' });
     } catch (err) {
       console.error(err);
@@ -213,7 +196,7 @@ const DownloadStatementView = ({ onBack }: Props) => {
     } finally {
       setGenerating(false);
     }
-  }, [filtered, profile, currency, incrementDownloads, toast]);
+  }, [filtered, profile, currency, toast]);
 
   return (
     <div className="space-y-4">
