@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN statement_downloads integer NOT NULL DEFAULT 0;
