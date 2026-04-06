@@ -149,7 +149,7 @@ const DownloadStatementView = ({ onBack }: Props) => {
         `${tx.category_emoji} ${tx.category}`,
         tx.payment_method.toUpperCase(),
         tx.type === 'income' ? 'Income' : 'Expense',
-        `${tx.type === 'expense' ? '-' : '+'}${currency}${Number(tx.amount).toLocaleString()}`,
+        `${tx.type === 'expense' ? '-' : '+'}${currency}${fmtAmount(Number(tx.amount))}`,
       ]);
 
       autoTable(doc, {
