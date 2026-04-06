@@ -286,6 +286,27 @@ export function useUpdateCustomCategory() {
   });
 }
 
+export function useIncrementStatementDownloads() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('statement_downloads')
+        .eq('user_id', user!.id)
+        .single();
+      const current = (profile as any)?.statement_downloads ?? 0;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ statement_downloads: current + 1 } as any)
+        .eq('user_id', user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['profile'] }),
+  });
+}
+
 export function useDeleteCustomCategory() {
   const { user } = useAuth();
   const qc = useQueryClient();
