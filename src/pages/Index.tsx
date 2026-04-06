@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings';
+type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings' | 'download-statement';
 
 const Index = () => {
   const { signOut } = useAuth();
