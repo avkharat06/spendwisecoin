@@ -196,7 +196,7 @@ const DownloadStatementView = ({ onBack }: Props) => {
     } finally {
       setGenerating(false);
     }
-  }, [filtered, profile, currency, incrementDownloads, toast]);
+  }, [filtered, profile, currency, toast]);
 
   return (
     <div className="space-y-4">
