@@ -125,6 +125,26 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const totalExpense = pieData.reduce((s, d) => s + d.value, 0);
   const topCategory = pieData[0];
 
+  const cashBalance = useMemo(() => {
+    let income = 0, expense = 0;
+    transactions.forEach(tx => {
+      if ((tx as any).payment_method === 'cash') {
+        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
+      }
+    });
+    return income - expense;
+  }, [transactions]);
+
+  const upiBalance = useMemo(() => {
+    let income = 0, expense = 0;
+    transactions.forEach(tx => {
+      if ((tx as any).payment_method === 'upi') {
+        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
+      }
+    });
+    return income - expense;
+  }, [transactions]);
+
   const grouped = useMemo(() => {
     const groups: Record<string, typeof transactions> = {};
     transactions.forEach(tx => {
@@ -212,6 +232,32 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+
+      {/* Cash & UPI Balance Cards */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="card-item flex items-center gap-3 p-3">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Banknote size={18} className="text-primary" />
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Cash</p>
+            <p className={`text-sm font-display font-bold ${cashBalance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
+              {cashBalance < 0 ? '-' : ''}{fmt(cashBalance)}
+            </p>
+          </div>
+        </div>
+        <div className="card-item flex items-center gap-3 p-3">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Smartphone size={18} className="text-primary" />
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">UPI</p>
+            <p className={`text-sm font-display font-bold ${upiBalance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
+              {upiBalance < 0 ? '-' : ''}{fmt(upiBalance)}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Pie Chart Breakdown */}
