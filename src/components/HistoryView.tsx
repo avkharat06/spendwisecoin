@@ -407,7 +407,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       </p>
                       {showRunningBalance && runningBalances.has(tx.id) && (
                         <p className={`text-[10px] font-display font-semibold ${runningBalances.get(tx.id)! >= 0 ? 'text-muted-foreground' : 'text-destructive/70'}`}>
-                          Bal: {runningBalances.get(tx.id)! >= 0 ? '' : '-'}{fmt(runningBalances.get(tx.id)!)}
+                          {tx.payment_method === 'upi' ? 'UPI' : 'Cash'} Bal: {runningBalances.get(tx.id)! >= 0 ? '' : '-'}{fmt(runningBalances.get(tx.id)!)}
                         </p>
                       )}
                     </div>
