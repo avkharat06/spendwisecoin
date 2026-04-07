@@ -125,6 +125,26 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const totalExpense = pieData.reduce((s, d) => s + d.value, 0);
   const topCategory = pieData[0];
 
+  const cashBalance = useMemo(() => {
+    let income = 0, expense = 0;
+    transactions.forEach(tx => {
+      if ((tx as any).payment_method === 'cash') {
+        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
+      }
+    });
+    return income - expense;
+  }, [transactions]);
+
+  const upiBalance = useMemo(() => {
+    let income = 0, expense = 0;
+    transactions.forEach(tx => {
+      if ((tx as any).payment_method === 'upi') {
+        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
+      }
+    });
+    return income - expense;
+  }, [transactions]);
+
   const grouped = useMemo(() => {
     const groups: Record<string, typeof transactions> = {};
     transactions.forEach(tx => {
