@@ -161,17 +161,17 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   // Compute running balance: all transactions sorted by date desc, running from bottom up
   const runningBalances = useMemo(() => {
     if (!showRunningBalance) return new Map<string, number>();
-    // Sort all filtered transactions by date asc, then created_at asc for running total
     const sorted = [...transactions].sort((a, b) => {
       const dateCompare = a.date.localeCompare(b.date);
       if (dateCompare !== 0) return dateCompare;
       return a.created_at.localeCompare(b.created_at);
     });
     const balances = new Map<string, number>();
-    let running = 0;
+    const runningByMethod: Record<string, number> = { cash: 0, upi: 0 };
     sorted.forEach(tx => {
-      running += tx.type === 'income' ? tx.amount : -tx.amount;
-      balances.set(tx.id, running);
+      const method = tx.payment_method || 'cash';
+      runningByMethod[method] += tx.type === 'income' ? tx.amount : -tx.amount;
+      balances.set(tx.id, runningByMethod[method]);
     });
     return balances;
   }, [transactions, showRunningBalance]);
@@ -407,7 +407,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                       </p>
                       {showRunningBalance && runningBalances.has(tx.id) && (
                         <p className={`text-[10px] font-display font-semibold ${runningBalances.get(tx.id)! >= 0 ? 'text-muted-foreground' : 'text-destructive/70'}`}>
-                          Bal: {runningBalances.get(tx.id)! >= 0 ? '' : '-'}{fmt(runningBalances.get(tx.id)!)}
+                          {tx.payment_method === 'upi' ? 'UPI' : 'Cash'} Bal: {runningBalances.get(tx.id)! >= 0 ? '' : '-'}{fmt(runningBalances.get(tx.id)!)}
                         </p>
                       )}
                     </div>
