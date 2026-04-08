@@ -231,8 +231,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
         </div>
       </div>
 
-      {/* Monthly Breakdown — Donut Chart + Legend */}
-      {categoryBreakdown.length > 0 && (
+      {/* Monthly Breakdown — Donut Chart + Legend — ALWAYS VISIBLE */}
       <div className="rounded-xl bg-card p-5 border border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display font-semibold text-sm text-muted-foreground">
@@ -254,66 +253,76 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-32 h-32 flex-shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryBreakdown}
-                    dataKey="amount"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={30}
-                    outerRadius={55}
-                    paddingAngle={2}
-                    strokeWidth={0}
-                  >
-                    {categoryBreakdown.map((cat, i) => (
-                      <Cell key={i} fill={cat.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.[0]) return null;
-                      const d = payload[0].payload;
-                      return (
-                        <div className="bg-card border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
-                          <p className="font-semibold text-foreground">{d.emoji} {d.name}</p>
-                          <p className="text-muted-foreground">{fmt(d.amount)}</p>
-                        </div>
-                      );
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex-1 space-y-2.5 max-h-40 overflow-y-auto pr-1">
-              {categoryBreakdown.map(cat => (
-                <button
-                  key={cat.name}
-                  onClick={() => onCategoryView?.(cat.name)}
-                  className="w-full flex items-center justify-between text-sm active:scale-[0.98] transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
-                    <span className="text-foreground truncate">{cat.name}</span>
-                  </div>
-                  <span className="text-muted-foreground font-display font-semibold whitespace-nowrap ml-2"><SmartAmount amount={cat.amount} currency={currency} /></span>
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Top spending insight — inside pie chart card */}
-          {topCategory && (
-            <div className="mt-4 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
-              <p className="text-xs text-primary font-medium">
-                💡 You spent the most on <strong>{topCategory.name}</strong> {breakdownPeriod === 'daily' ? 'today' : breakdownPeriod === 'weekly' ? 'this week' : breakdownPeriod === 'yearly' ? 'this year' : 'this month'} — {fmt(topCategory.amount)}
-              </p>
+          {categoryBreakdown.length > 0 ? (
+            <>
+              <div className="flex items-center gap-4">
+                <div className="w-32 h-32 flex-shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={categoryBreakdown}
+                        dataKey="amount"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={55}
+                        paddingAngle={2}
+                        strokeWidth={0}
+                      >
+                        {categoryBreakdown.map((cat, i) => (
+                          <Cell key={i} fill={cat.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.[0]) return null;
+                          const d = payload[0].payload;
+                          return (
+                            <div className="bg-card border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
+                              <p className="font-semibold text-foreground">{d.emoji} {d.name}</p>
+                              <p className="text-muted-foreground">{fmt(d.amount)}</p>
+                            </div>
+                          );
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex-1 space-y-2.5 max-h-40 overflow-y-auto pr-1">
+                  {categoryBreakdown.map(cat => (
+                    <button
+                      key={cat.name}
+                      onClick={() => onCategoryView?.(cat.name)}
+                      className="w-full flex items-center justify-between text-sm active:scale-[0.98] transition-all"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                        <span className="text-foreground truncate">{cat.name}</span>
+                      </div>
+                      <span className="text-muted-foreground font-display font-semibold whitespace-nowrap ml-2"><SmartAmount amount={cat.amount} currency={currency} /></span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top spending insight */}
+              {topCategory && (
+                <div className="mt-4 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
+                  <p className="text-xs text-primary font-medium">
+                    💡 You spent the most on <strong>{topCategory.name}</strong> {breakdownPeriod === 'daily' ? 'today' : breakdownPeriod === 'weekly' ? 'this week' : breakdownPeriod === 'yearly' ? 'this year' : 'this month'} — {fmt(topCategory.amount)}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-3xl mb-2">🎉</p>
+              <p className="text-foreground font-display font-semibold text-sm">Looks like you saved {breakdownPeriod === 'daily' ? 'today' : breakdownPeriod === 'weekly' ? 'this week' : breakdownPeriod === 'yearly' ? 'this year' : 'this month'}!</p>
+              <p className="text-muted-foreground text-xs mt-1">No transactions found for this period</p>
             </div>
           )}
         </div>
-      )}
 
       {/* Budget Progress */}
       {budgetEnabled && monthlyBudget > 0 && (
