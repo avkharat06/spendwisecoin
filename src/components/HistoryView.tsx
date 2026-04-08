@@ -1,7 +1,8 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartphone, Banknote } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartphone, Banknote, Search, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { SmartAmount, abbreviateNumber } from '@/lib/format-amount';
 
 import EditTransactionModal from './EditTransactionModal';
 import TransactionDetailModal from './TransactionDetailModal';
@@ -9,6 +10,9 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from '@/components/ui/sheet';
 
 interface HistoryViewProps {
   filter?: 'expense' | 'income' | 'all';
@@ -21,6 +25,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const { data: allTransactions = [] } = useTransactions();
   const { data: profile } = useProfile();
   const currency = profile?.currency || '₹';
+  const locale = currency === '₹' ? 'en-IN' : 'en-US';
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'upi' | 'cash'>(initialPaymentFilter || 'all');
   const softDelete = useSoftDeleteTransactions();
@@ -28,14 +33,59 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const [editingTx, setEditingTx] = useState<typeof allTransactions[0] | null>(null);
   const [viewingTx, setViewingTx] = useState<typeof allTransactions[0] | null>(null);
 
+  // Search & filter state
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [filterPayment, setFilterPayment] = useState<'all' | 'upi' | 'cash'>('all');
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchInput), 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  // Get all unique categories for filter
+  const allCategories = useMemo(() => {
+    const cats = new Set<string>();
+    allTransactions.forEach(tx => cats.add(tx.category));
+    return Array.from(cats).sort();
+  }, [allTransactions]);
+
+  const hasActiveFilters = filterType !== 'all' || filterCategory !== null || filterPayment !== 'all';
+
+  const clearAllFilters = () => {
+    setFilterType('all');
+    setFilterCategory(null);
+    setFilterPayment('all');
+  };
+
   const transactions = useMemo(() => {
     let filtered = allTransactions;
     if (filter && filter !== 'all') filtered = filtered.filter(tx => tx.type === filter);
     if (categoryFilter) filtered = filtered.filter(tx => tx.category === categoryFilter);
     if (selectedMonth) filtered = filtered.filter(tx => tx.date.startsWith(selectedMonth));
     if (paymentFilter !== 'all') filtered = filtered.filter(tx => (tx as any).payment_method === paymentFilter);
+
+    // Apply search
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
+      filtered = filtered.filter(tx =>
+        tx.merchant.toLowerCase().includes(q) ||
+        tx.category.toLowerCase().includes(q) ||
+        tx.amount.toString().includes(q)
+      );
+    }
+
+    // Apply filter sheet filters
+    if (filterType !== 'all') filtered = filtered.filter(tx => tx.type === filterType);
+    if (filterCategory) filtered = filtered.filter(tx => tx.category === filterCategory);
+    if (filterPayment !== 'all') filtered = filtered.filter(tx => (tx as any).payment_method === filterPayment);
+
     return filtered;
-  }, [allTransactions, filter, categoryFilter, selectedMonth, paymentFilter]);
+  }, [allTransactions, filter, categoryFilter, selectedMonth, paymentFilter, debouncedSearch, filterType, filterCategory, filterPayment]);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
@@ -56,7 +106,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
 
   const formatMonth = (ym: string) => {
     const [y, m] = ym.split('-');
-    return new Date(parseInt(y), parseInt(m) - 1).toLocaleDateString(currency === '₹' ? 'en-IN' : 'en-US', { month: 'short', year: 'numeric' });
+    return new Date(parseInt(y), parseInt(m) - 1).toLocaleDateString(locale, { month: 'short', year: 'numeric' });
   };
 
   const toggle = (id: string) => {
@@ -109,7 +159,6 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
     });
   };
 
-  // Pie chart data
   const pieData = useMemo(() => {
     const expenses = transactions.filter(t => t.type === 'expense');
     const grouped: Record<string, { amount: number; emoji: string; color: string }> = {};
@@ -154,11 +203,10 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
     return Object.entries(groups).sort(([a], [b]) => b.localeCompare(a));
   }, [transactions]);
 
-  const fmt = (n: number) => currency + Math.abs(n).toLocaleString(currency === '₹' ? 'en-IN' : 'en-US');
+  const fmt = (n: number) => currency + Math.abs(n).toLocaleString(locale);
 
   const showRunningBalance = (profile as any)?.show_running_balance !== false;
 
-  // Compute running balance: all transactions sorted by date desc, running from bottom up
   const runningBalances = useMemo(() => {
     if (!showRunningBalance) return new Map<string, number>();
     const sorted = [...transactions].sort((a, b) => {
@@ -234,6 +282,139 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         </DropdownMenu>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by name, category, amount..."
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            {searchInput && (
+              <button onClick={() => setSearchInput('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <X size={14} className="text-muted-foreground" />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => setFilterSheetOpen(true)}
+            className={`p-2.5 rounded-xl active:scale-95 transition-all ${hasActiveFilters ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+          >
+            <SlidersHorizontal size={18} />
+          </button>
+        </div>
+
+        {/* Active filter chips */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            {filterType !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                {filterType === 'income' ? 'Income' : 'Expense'}
+                <button onClick={() => setFilterType('all')}><X size={12} /></button>
+              </span>
+            )}
+            {filterCategory && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                {filterCategory}
+                <button onClick={() => setFilterCategory(null)}><X size={12} /></button>
+              </span>
+            )}
+            {filterPayment !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                {filterPayment === 'upi' ? '💳 UPI' : '💵 Cash'}
+                <button onClick={() => setFilterPayment('all')}><X size={12} /></button>
+              </span>
+            )}
+            <button onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground font-medium ml-1">
+              Clear all
+            </button>
+          </div>
+        )}
+
+        {(debouncedSearch || hasActiveFilters) && (
+          <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">
+            Showing {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
+          </p>
+        )}
+      </div>
+
+      {/* Filter Bottom Sheet */}
+      <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle className="text-lg font-display font-bold">Filters</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-5 py-4">
+            {/* Type filter */}
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Type</p>
+              <div className="flex gap-2">
+                {(['all', 'income', 'expense'] as const).map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setFilterType(t)}
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${filterType === t ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+                  >
+                    {t === 'all' ? 'All' : t === 'income' ? 'Income' : 'Expense'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment method filter */}
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Payment Method</p>
+              <div className="flex gap-2">
+                {(['all', 'upi', 'cash'] as const).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => setFilterPayment(m)}
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${filterPayment === m ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+                  >
+                    {m === 'all' ? 'All' : m === 'upi' ? '💳 UPI' : '💵 Cash'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Category filter */}
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Category</p>
+              <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                <button
+                  onClick={() => setFilterCategory(null)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${!filterCategory ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+                >
+                  All
+                </button>
+                {allCategories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilterCategory(cat)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${filterCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button onClick={clearAllFilters} className="flex-1 py-2.5 rounded-xl bg-secondary text-sm font-semibold text-muted-foreground active:scale-95 transition-all">
+                Clear All
+              </button>
+              <button onClick={() => setFilterSheetOpen(false)} className="flex-1 py-2.5 rounded-xl bg-primary text-sm font-semibold text-primary-foreground active:scale-95 transition-all">
+                Apply
+              </button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {/* Cash & UPI Balance Cards */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="card-item flex items-center gap-3 p-3">
@@ -243,7 +424,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
           <div>
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Cash</p>
             <p className={`text-sm font-display font-bold ${cashBalance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
-              {cashBalance < 0 ? '-' : ''}{fmt(cashBalance)}
+              <SmartAmount amount={Math.abs(cashBalance)} currency={currency} sign={cashBalance < 0 ? '-' : ''} />
             </p>
           </div>
         </div>
@@ -254,7 +435,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
           <div>
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">UPI</p>
             <p className={`text-sm font-display font-bold ${upiBalance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
-              {upiBalance < 0 ? '-' : ''}{fmt(upiBalance)}
+              <SmartAmount amount={Math.abs(upiBalance)} currency={currency} sign={upiBalance < 0 ? '-' : ''} />
             </p>
           </div>
         </div>
@@ -295,7 +476,9 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }} />
                     <span className="text-foreground">{d.name}</span>
                   </div>
-                  <span className="text-muted-foreground font-display font-semibold">{fmt(d.value)}</span>
+                  <span className="text-muted-foreground font-display font-semibold">
+                    <SmartAmount amount={d.value} currency={currency} />
+                  </span>
                 </div>
               ))}
             </div>
@@ -313,7 +496,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
           <div>
             <p className="text-xs text-muted-foreground font-semibold">{selected.size} selected</p>
             <p className={`text-lg font-display font-bold ${selectionTotal >= 0 ? 'text-primary' : 'text-destructive'}`}>
-              {selectionTotal >= 0 ? '+' : '-'}{fmt(selectionTotal)}
+              <SmartAmount amount={Math.abs(selectionTotal)} currency={currency} sign={selectionTotal >= 0 ? '+' : '-'} />
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -352,13 +535,13 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                 </button>
               )}
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                {new Date(date + 'T00:00:00').toLocaleDateString(currency === '₹' ? 'en-IN' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
+                {new Date(date + 'T00:00:00').toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })}
               </p>
             </div>
             {selectionMode && (
               <div className="flex items-center gap-2 text-[10px] font-display font-bold">
-                {dateExpense > 0 && <span className="text-destructive">-{currency}{dateExpense.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}</span>}
-                {dateIncome > 0 && <span className="text-green-400">+{currency}{dateIncome.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}</span>}
+                {dateExpense > 0 && <span className="text-destructive">-{currency}{dateExpense.toLocaleString(locale)}</span>}
+                {dateIncome > 0 && <span className="text-green-400">+{currency}{dateIncome.toLocaleString(locale)}</span>}
               </div>
             )}
           </div>
@@ -403,11 +586,11 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
                     </div>
                     <div className="text-right">
                       <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                        {tx.payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toLocaleString(currency === '₹' ? 'en-IN' : 'en-US')}
+                        {tx.payment_method === 'upi' ? '💳' : '💵'} <SmartAmount amount={tx.amount} currency={currency} sign={tx.type === 'income' ? '+' : '-'} />
                       </p>
                       {showRunningBalance && runningBalances.has(tx.id) && (
                         <p className={`text-[10px] font-display font-semibold ${runningBalances.get(tx.id)! >= 0 ? 'text-muted-foreground' : 'text-destructive/70'}`}>
-                          {tx.payment_method === 'upi' ? 'UPI' : 'Cash'} Bal: {runningBalances.get(tx.id)! >= 0 ? '' : '-'}{fmt(runningBalances.get(tx.id)!)}
+                          {tx.payment_method === 'upi' ? 'UPI' : 'Cash'} Bal: <SmartAmount amount={Math.abs(runningBalances.get(tx.id)!)} currency={currency} sign={runningBalances.get(tx.id)! < 0 ? '-' : ''} />
                         </p>
                       )}
                     </div>
