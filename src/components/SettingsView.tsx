@@ -432,7 +432,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
                 </div>
                 <span className="flex-1 text-sm font-medium text-foreground">{cat.name}</span>
                 <button
-                  onClick={() => setEditingCategory({ id: cat.id, name: cat.name, emoji: cat.emoji, color: cat.color })}
+                  onClick={() => setEditingCategory({ id: cat.id, name: cat.name, emoji: cat.emoji, color: cat.color, type: (cat as any).type || 'both' })}
                   className="p-1.5 rounded-lg bg-card hover:bg-card/80 active:scale-95 transition-all"
                 >
                   <Pencil size={14} className="text-muted-foreground" />
