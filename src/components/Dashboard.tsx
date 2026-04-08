@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTransactions, useProfile } from '@/lib/store';
 import { AlertTriangle } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { SmartAmount } from '@/lib/format-amount';
 
 interface DashboardProps {
   onFilterView?: (filter: 'expense' | 'income' | 'all') => void;
@@ -135,16 +136,16 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
         <div className="flex gap-2 mt-1">
           <button onClick={() => onPaymentMethodView?.('upi')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💳 UPI</p>
-            <p className="text-[8px] text-muted-foreground/60 font-medium">Remaining Balance</p>
+            <p className="text-[8px] text-muted-foreground/60 font-medium">Total Balance</p>
             <p className="text-xs font-display font-bold text-green-400">
-              {fmt(stats.totalUpiIncome - stats.totalUpiSpent)}
+              <SmartAmount amount={Math.abs(stats.totalUpiIncome - stats.totalUpiSpent)} currency={currency} sign={(stats.totalUpiIncome - stats.totalUpiSpent) >= 0 ? '' : '-'} />
             </p>
           </button>
           <button onClick={() => onPaymentMethodView?.('cash')} className="rounded-xl bg-secondary/80 px-3 py-1.5 text-center active:scale-95 transition-all">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">💵 Cash</p>
-            <p className="text-[8px] text-muted-foreground/60 font-medium">Remaining Balance</p>
+            <p className="text-[8px] text-muted-foreground/60 font-medium">Total Balance</p>
             <p className="text-xs font-display font-bold text-green-400">
-              {fmt(stats.totalCashIncome - stats.totalCashSpent)}
+              <SmartAmount amount={Math.abs(stats.totalCashIncome - stats.totalCashSpent)} currency={currency} sign={(stats.totalCashIncome - stats.totalCashSpent) >= 0 ? '' : '-'} />
             </p>
           </button>
         </div>
@@ -173,7 +174,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
           </div>
         </div>
         <p className={`text-3xl font-display font-bold ${(balanceStats.income - balanceStats.spent) >= 0 ? 'text-green-400' : 'text-destructive'}`}>
-          {(balanceStats.income - balanceStats.spent) >= 0 ? '+' : '-'}{fmt(Math.abs(balanceStats.income - balanceStats.spent))}
+          <SmartAmount amount={Math.abs(balanceStats.income - balanceStats.spent)} currency={currency} sign={(balanceStats.income - balanceStats.spent) >= 0 ? '+' : '-'} />
         </p>
 
         <div className="grid grid-cols-3 gap-2 mt-4">
@@ -185,7 +186,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               <span className="text-destructive text-[10px]">↘</span>
               <span className="text-[9px] font-bold text-destructive uppercase tracking-wider">Spent</span>
             </div>
-            <p className="text-sm font-display font-bold text-destructive">{fmt(balanceStats.spent)}</p>
+            <p className="text-sm font-display font-bold text-destructive"><SmartAmount amount={balanceStats.spent} currency={currency} /></p>
           </button>
           <button
             onClick={() => onFilterView?.('income')}
@@ -195,7 +196,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               <span className="text-green-400 text-[10px]">↗</span>
               <span className="text-[9px] font-bold text-green-400 uppercase tracking-wider">Income</span>
             </div>
-            <p className="text-sm font-display font-bold text-green-400">{fmt(balanceStats.income)}</p>
+            <p className="text-sm font-display font-bold text-green-400"><SmartAmount amount={balanceStats.income} currency={currency} /></p>
           </button>
           <button
             onClick={() => onFilterView?.('all')}
@@ -205,7 +206,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               <span className="text-cyan-400 text-[10px]">—</span>
               <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">Net</span>
             </div>
-            <p className="text-sm font-display font-bold text-cyan-400">{fmt(Math.abs(balanceStats.income - balanceStats.spent))}</p>
+            <p className="text-sm font-display font-bold text-cyan-400"><SmartAmount amount={Math.abs(balanceStats.income - balanceStats.spent)} currency={currency} /></p>
           </button>
         </div>
 
@@ -216,16 +217,16 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
               <span className="text-sm">💳</span>
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">UPI</span>
             </div>
-            <p className="text-xs font-display font-bold text-destructive">-{fmt(stats.monthUpiSpent)}</p>
-            <p className="text-xs font-display font-bold text-green-400">+{fmt(stats.monthUpiIncome)}</p>
+            <p className="text-xs font-display font-bold text-destructive"><SmartAmount amount={stats.monthUpiSpent} currency={currency} sign="-" /></p>
+            <p className="text-xs font-display font-bold text-green-400"><SmartAmount amount={stats.monthUpiIncome} currency={currency} sign="+" /></p>
           </div>
           <div className="rounded-xl bg-secondary/60 px-3 py-2.5">
             <div className="flex items-center gap-1.5 mb-1">
               <span className="text-sm">💵</span>
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Cash</span>
             </div>
-            <p className="text-xs font-display font-bold text-destructive">-{fmt(stats.monthCashSpent)}</p>
-            <p className="text-xs font-display font-bold text-green-400">+{fmt(stats.monthCashIncome)}</p>
+            <p className="text-xs font-display font-bold text-destructive"><SmartAmount amount={stats.monthCashSpent} currency={currency} sign="-" /></p>
+            <p className="text-xs font-display font-bold text-green-400"><SmartAmount amount={stats.monthCashIncome} currency={currency} sign="+" /></p>
           </div>
         </div>
       </div>
@@ -297,7 +298,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
                     <span className="text-foreground truncate">{cat.name}</span>
                   </div>
-                  <span className="text-muted-foreground font-display font-semibold whitespace-nowrap ml-2">{fmt(cat.amount)}</span>
+                  <span className="text-muted-foreground font-display font-semibold whitespace-nowrap ml-2"><SmartAmount amount={cat.amount} currency={currency} /></span>
                 </button>
               ))}
             </div>
@@ -352,7 +353,7 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
                   </p>
                 </div>
                 <p className={`text-sm font-display font-bold ${tx.type === 'income' ? 'text-green-400' : 'text-destructive'}`}>
-                  {(tx as any).payment_method === 'upi' ? '💳' : '💵'} {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
+                  {(tx as any).payment_method === 'upi' ? '💳' : '💵'} <SmartAmount amount={tx.amount} currency={currency} sign={tx.type === 'income' ? '+' : '-'} />
                 </p>
               </div>
             ))}
