@@ -30,7 +30,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [budgetValue, setBudgetValue] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string } | null>(null);
+  const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string; type?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: customCategories = [] } = useCustomCategories();
   const [pendingCurrency, setPendingCurrency] = useState<string | null>(null);
@@ -432,7 +432,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
                 </div>
                 <span className="flex-1 text-sm font-medium text-foreground">{cat.name}</span>
                 <button
-                  onClick={() => setEditingCategory({ id: cat.id, name: cat.name, emoji: cat.emoji, color: cat.color })}
+                  onClick={() => setEditingCategory({ id: cat.id, name: cat.name, emoji: cat.emoji, color: cat.color, type: (cat as any).type || 'both' })}
                   className="p-1.5 rounded-lg bg-card hover:bg-card/80 active:scale-95 transition-all"
                 >
                   <Pencil size={14} className="text-muted-foreground" />

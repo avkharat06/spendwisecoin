@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface EditCategoryModalProps {
-  category: { id: string; name: string; emoji: string; color: string };
+  category: { id: string; name: string; emoji: string; color: string; type?: string };
   onClose: () => void;
 }
 
@@ -24,23 +24,48 @@ const COLOR_OPTIONS = [
 const EditCategoryModal = ({ category, onClose }: EditCategoryModalProps) => {
   const [name, setName] = useState(category.name);
   const [emoji, setEmoji] = useState(category.emoji);
+  const [customEmoji, setCustomEmoji] = useState(
+    EMOJI_OPTIONS.includes(category.emoji) ? '' : category.emoji
+  );
   const [color, setColor] = useState(category.color);
+  const [categoryType, setCategoryType] = useState<'expense' | 'income' | 'both'>(
+    (category.type as any) || 'both'
+  );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRenameConfirm, setShowRenameConfirm] = useState(false);
   const updateCategory = useUpdateCustomCategory();
   const deleteCategory = useDeleteCustomCategory();
   const { toast } = useToast();
+
+  const displayEmoji = customEmoji || emoji;
 
   const handleSave = async () => {
     if (!name.trim()) {
       toast({ title: 'Category name is required', variant: 'destructive' });
       return;
     }
+    // If name changed, show confirmation
+    if (name.trim() !== category.name) {
+      setShowRenameConfirm(true);
+      return;
+    }
+    await doSave();
+  };
+
+  const doSave = async () => {
     try {
-      await updateCategory.mutateAsync({ id: category.id, name: name.trim(), emoji, color });
-      toast({ title: 'Category updated!' });
+      await updateCategory.mutateAsync({
+        id: category.id,
+        oldName: category.name,
+        name: name.trim(),
+        emoji: displayEmoji,
+        color,
+        type: categoryType,
+      });
+      toast({ title: 'Category updated ✓' });
       onClose();
     } catch {
-      toast({ title: 'Error updating category', variant: 'destructive' });
+      toast({ title: 'Update failed, try again', variant: 'destructive' });
     }
   };
 
@@ -57,7 +82,7 @@ const EditCategoryModal = ({ category, onClose }: EditCategoryModalProps) => {
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60 backdrop-blur-sm" onClick={onClose}>
-        <div className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in" onClick={e => e.stopPropagation()}>
+        <div className="w-full max-w-lg bg-card rounded-t-3xl border border-border/50 p-6 pb-10 animate-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-display font-bold text-foreground">Edit Category</h2>
             <div className="flex items-center gap-2">
@@ -73,7 +98,7 @@ const EditCategoryModal = ({ category, onClose }: EditCategoryModalProps) => {
           {/* Preview */}
           <div className="flex flex-col items-center mb-6">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-2" style={{ backgroundColor: color + '20' }}>
-              {emoji}
+              {displayEmoji}
             </div>
             <p className="text-sm font-semibold text-foreground">{name || 'Category'}</p>
           </div>
@@ -89,15 +114,53 @@ const EditCategoryModal = ({ category, onClose }: EditCategoryModalProps) => {
             />
           </div>
 
-          {/* Emoji Picker */}
+          {/* Category Type */}
           <div className="mb-4">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Emoji</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Used For</label>
+            <div className="flex rounded-xl bg-secondary p-1">
+              {(['expense', 'income', 'both'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setCategoryType(t)}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                    categoryType === t
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {t === 'expense' ? 'Expense' : t === 'income' ? 'Income' : 'Both'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom Emoji Input */}
+          <div className="mb-4">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">Category Icon</label>
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={customEmoji}
+                onChange={e => {
+                  const val = e.target.value;
+                  setCustomEmoji(val.slice(-2));
+                }}
+                placeholder="Type or paste emoji..."
+                className="flex-1 px-4 py-2.5 rounded-xl bg-secondary text-foreground text-lg border border-border focus:border-primary focus:outline-none transition-all text-center"
+                maxLength={2}
+              />
+              {customEmoji && (
+                <button onClick={() => setCustomEmoji('')} className="text-xs text-muted-foreground hover:text-foreground">
+                  Clear
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-10 gap-1.5 max-h-24 overflow-y-auto">
               {EMOJI_OPTIONS.map(e => (
                 <button
                   key={e}
-                  onClick={() => setEmoji(e)}
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg transition-all active:scale-90 ${emoji === e ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'}`}
+                  onClick={() => { setEmoji(e); setCustomEmoji(''); }}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg transition-all active:scale-90 ${!customEmoji && emoji === e ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary'}`}
                 >
                   {e}
                 </button>
@@ -132,6 +195,21 @@ const EditCategoryModal = ({ category, onClose }: EditCategoryModalProps) => {
         </div>
       </div>
 
+      {/* Rename Confirmation */}
+      <AlertDialog open={showRenameConfirm} onOpenChange={setShowRenameConfirm}>
+        <AlertDialogContent className="rounded-2xl border-border/50 bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Rename to "{name.trim()}"?</AlertDialogTitle>
+            <AlertDialogDescription>This updates all existing transactions too.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction className="rounded-xl bg-primary hover:bg-primary/90" onClick={doSave}>Yes, Rename</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent className="rounded-2xl border-border/50 bg-card">
           <AlertDialogHeader>
