@@ -226,7 +226,7 @@ export const DEFAULT_INCOME_CATEGORIES = [
 // All unique defaults (deduplicated by name)
 export const DEFAULT_CATEGORIES = (() => {
   const seen = new Set<string>();
-  const result: typeof DEFAULT_EXPENSE_CATEGORIES = [];
+  const result: { name: string; emoji: string; color: string; type: string }[] = [];
   [...DEFAULT_EXPENSE_CATEGORIES, ...DEFAULT_INCOME_CATEGORIES].forEach(c => {
     if (!seen.has(c.name)) { seen.add(c.name); result.push(c); }
   });
