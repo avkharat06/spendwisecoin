@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useProfile, useUpdateProfile, useCustomCategories } from '@/lib/store';
+import { useProfile, useUpdateProfile, useCustomCategories, useTransactions } from '@/lib/store';
 import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
@@ -7,6 +7,12 @@ import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import EditCategoryModal from './EditCategoryModal';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+const EXCHANGE_RATE = 83.5;
 
 interface SettingsViewProps {
   onBack: () => void;
@@ -15,6 +21,7 @@ interface SettingsViewProps {
 const SettingsView = ({ onBack }: SettingsViewProps) => {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
+  const { data: allTransactions = [] } = useTransactions();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -26,8 +33,8 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: customCategories = [] } = useCustomCategories();
+  const [pendingCurrency, setPendingCurrency] = useState<string | null>(null);
 
-  // Sync state when profile loads
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name || '');
@@ -59,8 +66,51 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
     }
   };
 
-  const handleCurrencyChange = async (c: string) => {
-    await updateProfile.mutateAsync({ currency: c });
+  const handleCurrencyChange = (c: string) => {
+    if (c === profile?.currency) return;
+    setPendingCurrency(c);
+  };
+
+  const confirmCurrencyChange = async () => {
+    if (!pendingCurrency || !user) return;
+    const currentCurrency = profile?.currency || '₹';
+    const targetCurrency = pendingCurrency;
+
+    try {
+      // Determine conversion factor
+      const factor = currentCurrency === '₹' && targetCurrency === '$'
+        ? 1 / EXCHANGE_RATE
+        : currentCurrency === '$' && targetCurrency === '₹'
+        ? EXCHANGE_RATE
+        : 1;
+
+      // Convert all transactions
+      if (factor !== 1 && allTransactions.length > 0) {
+        for (const tx of allTransactions) {
+          const newAmount = parseFloat((tx.amount * factor).toFixed(2));
+          await supabase
+            .from('transactions')
+            .update({ amount: newAmount })
+            .eq('id', tx.id);
+        }
+      }
+
+      // Convert budget
+      const currentBudget = profile?.monthly_budget ?? 0;
+      const newBudget = factor !== 1 ? parseFloat((currentBudget * factor).toFixed(2)) : currentBudget;
+
+      await updateProfile.mutateAsync({
+        currency: targetCurrency,
+        monthly_budget: newBudget,
+      });
+      setBudgetValue(String(newBudget));
+
+      toast({ title: `Switched to ${targetCurrency === '$' ? 'USD' : 'INR'}! All amounts converted.` });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setPendingCurrency(null);
+    }
   };
 
   const handleBudgetSave = async () => {
@@ -154,6 +204,8 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       </div>
     );
   }
+
+  const currentCurrency = profile.currency || '₹';
 
   return (
     <div className="animate-in pb-4">
@@ -265,7 +317,33 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
             </button>
           ))}
         </div>
+        <p className="text-[10px] text-muted-foreground mt-2 text-center">
+          Exchange rate: ₹{EXCHANGE_RATE} = $1
+        </p>
       </div>
+
+      {/* Currency Confirmation Dialog */}
+      <AlertDialog open={!!pendingCurrency} onOpenChange={open => { if (!open) setPendingCurrency(null); }}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">
+              Switch to {pendingCurrency === '$' ? 'USD' : 'INR'}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {currentCurrency === '₹' && pendingCurrency === '$'
+                ? `All amounts will be converted at ₹${EXCHANGE_RATE} = $1`
+                : `All amounts will be converted at $1 = ₹${EXCHANGE_RATE}`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCurrencyChange} className="rounded-xl bg-primary text-primary-foreground">
+              Yes, Switch
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Recent Activity Toggle */}
       <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
