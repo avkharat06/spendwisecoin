@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile, useUpdateProfile, useCustomCategories } from '@/lib/store';
-import { ArrowLeft, User, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag, Trash2 } from 'lucide-react';
+import { ArrowLeft, User, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag, Trash2, Plus } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
