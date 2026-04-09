@@ -1,18 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useProfile, useUpdateProfile, useCustomCategories, useTransactions } from '@/lib/store';
-import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag } from 'lucide-react';
+import { useProfile, useUpdateProfile, useCustomCategories } from '@/lib/store';
+import { ArrowLeft, User, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import EditCategoryModal from './EditCategoryModal';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-const EXCHANGE_RATE = 83.5;
 
 interface SettingsViewProps {
   onBack: () => void;
@@ -21,7 +15,6 @@ interface SettingsViewProps {
 const SettingsView = ({ onBack }: SettingsViewProps) => {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
-  const { data: allTransactions = [] } = useTransactions();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -62,53 +55,6 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       toast({ title: 'Profile updated!' });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
-    }
-  };
-
-  const handleCurrencyChange = (c: string) => {
-    if (c === profile?.currency) return;
-    setPendingCurrency(c);
-  };
-
-  const confirmCurrencyChange = async () => {
-    if (!pendingCurrency || !user) return;
-    const currentCurrency = profile?.currency || '₹';
-    const targetCurrency = pendingCurrency;
-
-    try {
-      // Determine conversion factor
-      const factor = currentCurrency === '₹' && targetCurrency === '$'
-        ? 1 / EXCHANGE_RATE
-        : currentCurrency === '$' && targetCurrency === '₹'
-        ? EXCHANGE_RATE
-        : 1;
-
-      // Convert all transactions
-      if (factor !== 1 && allTransactions.length > 0) {
-        for (const tx of allTransactions) {
-          const newAmount = parseFloat((tx.amount * factor).toFixed(2));
-          await supabase
-            .from('transactions')
-            .update({ amount: newAmount })
-            .eq('id', tx.id);
-        }
-      }
-
-      // Convert budget
-      const currentBudget = profile?.monthly_budget ?? 0;
-      const newBudget = factor !== 1 ? parseFloat((currentBudget * factor).toFixed(2)) : currentBudget;
-
-      await updateProfile.mutateAsync({
-        currency: targetCurrency,
-        monthly_budget: newBudget,
-      });
-      setBudgetValue(String(newBudget));
-
-      toast({ title: `Switched to ${targetCurrency === '$' ? 'USD' : 'INR'}! All amounts converted.` });
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
-    } finally {
-      setPendingCurrency(null);
     }
   };
 
@@ -204,8 +150,6 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
     );
   }
 
-  const currentCurrency = profile.currency || '₹';
-
   return (
     <div className="animate-in pb-4">
       <div className="flex items-center gap-3 mb-6">
@@ -294,55 +238,6 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
           </button>
         </div>
       </div>
-
-      {/* Currency Section */}
-      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
-        <div className="flex items-center gap-2 mb-4">
-          <DollarSign size={18} className="text-primary" />
-          <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">Currency</h3>
-        </div>
-        <div className="flex gap-3">
-          {(['₹', '$'] as const).map(c => (
-            <button
-              key={c}
-              onClick={() => handleCurrencyChange(c)}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 ${
-                profile.currency === c
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-muted-foreground'
-              }`}
-            >
-              {c === '₹' ? '₹ INR' : '$ USD'}
-            </button>
-          ))}
-        </div>
-        <p className="text-[10px] text-muted-foreground mt-2 text-center">
-          Exchange rate: ₹{EXCHANGE_RATE} = $1
-        </p>
-      </div>
-
-      {/* Currency Confirmation Dialog */}
-      <AlertDialog open={!!pendingCurrency} onOpenChange={open => { if (!open) setPendingCurrency(null); }}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-display">
-              Switch to {pendingCurrency === '$' ? 'USD' : 'INR'}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {currentCurrency === '₹' && pendingCurrency === '$'
-                ? `All amounts will be converted at ₹${EXCHANGE_RATE} = $1`
-                : `All amounts will be converted at $1 = ₹${EXCHANGE_RATE}`
-              }
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmCurrencyChange} className="rounded-xl bg-primary text-primary-foreground">
-              Yes, Switch
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Recent Activity Toggle */}
       <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
