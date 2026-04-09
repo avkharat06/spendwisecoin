@@ -15,7 +15,7 @@ export function useProfile() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id,user_id,display_name,currency,monthly_budget,budget_enabled,show_recent_activity,show_running_balance,avatar_url,statement_downloads')
         .eq('user_id', user!.id)
         .maybeSingle();
       if (error) throw error;
@@ -65,7 +65,7 @@ export function useTransactions() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('transactions')
-        .select('*')
+        .select('id,amount,type,category,category_emoji,category_color,merchant,date,note,quantity,payment_method,created_at')
         .eq('user_id', user!.id)
         .eq('is_deleted', false)
         .order('date', { ascending: false })
@@ -85,7 +85,7 @@ export function useDeletedTransactions() {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from('transactions')
-        .select('*')
+        .select('id,amount,type,category,category_emoji,category_color,merchant,date,note,quantity,payment_method,deleted_at,created_at')
         .eq('user_id', user!.id)
         .eq('is_deleted', true)
         .gte('deleted_at', thirtyDaysAgo)
@@ -240,7 +240,7 @@ export function useCustomCategories() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('custom_categories')
-        .select('*')
+        .select('id,name,emoji,color,type')
         .eq('user_id', user!.id);
       if (error) throw error;
       return data ?? [];
