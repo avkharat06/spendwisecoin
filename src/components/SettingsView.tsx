@@ -15,7 +15,7 @@ interface SettingsViewProps {
 const SettingsView = ({ onBack }: SettingsViewProps) => {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
-  const { data: allTransactions = [] } = useTransactions();
+  const updateProfile = useUpdateProfile();
   const { user } = useAuth();
   const { toast } = useToast();
 
