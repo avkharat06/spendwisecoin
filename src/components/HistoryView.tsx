@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
 import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartphone, Banknote, Search, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -631,4 +631,4 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   );
 };
 
-export default HistoryView;
+export default React.memo(HistoryView);
