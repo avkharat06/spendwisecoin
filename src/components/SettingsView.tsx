@@ -362,12 +362,18 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       </div>
 
       {/* Custom Categories */}
-      {customCategories.length > 0 && (
-        <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <div className="flex items-center gap-2 mb-4">
-            <Tag size={18} className="text-primary" />
-            <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">My Categories</h3>
-          </div>
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center gap-2 mb-4">
+          <Tag size={18} className="text-primary" />
+          <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest flex-1">My Categories</h3>
+          <button
+            onClick={() => setShowAddCategory(true)}
+            className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 active:scale-95 transition-all"
+          >
+            <Plus size={16} className="text-primary" />
+          </button>
+        </div>
+        {customCategories.length > 0 ? (
           <div className="space-y-2">
             {customCategories.map(cat => (
               <div key={cat.id} className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-secondary">
@@ -384,11 +390,17 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-xs text-muted-foreground text-center py-3">No custom categories yet. Tap + to add one.</p>
+        )}
+      </div>
 
       {editingCategory && (
         <EditCategoryModal category={editingCategory} onClose={() => setEditingCategory(null)} />
+      )}
+
+      {showAddCategory && (
+        <AddCategoryModal onClose={() => setShowAddCategory(false)} />
       )}
 
       {/* Clear Data Section */}
