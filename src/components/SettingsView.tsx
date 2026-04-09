@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile, useUpdateProfile, useCustomCategories } from '@/lib/store';
-import { ArrowLeft, User, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag } from 'lucide-react';
+import { ArrowLeft, User, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag, Trash2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import EditCategoryModal from './EditCategoryModal';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface SettingsViewProps {
   onBack: () => void;
@@ -26,6 +31,49 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string; type?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: customCategories = [] } = useCustomCategories();
+  const queryClient = useQueryClient();
+  const [clearTarget, setClearTarget] = useState<'transactions' | 'categories' | 'all' | null>(null);
+  const [clearing, setClearing] = useState(false);
+
+  const handleClearData = async () => {
+    if (!clearTarget || !user) return;
+    setClearing(true);
+    try {
+      if (clearTarget === 'transactions' || clearTarget === 'all') {
+        const { error } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
+      if (clearTarget === 'categories' || clearTarget === 'all') {
+        const { error } = await supabase
+          .from('custom_categories')
+          .delete()
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
+      if (clearTarget === 'all') {
+        await updateProfile.mutateAsync({
+          monthly_budget: 0,
+          budget_enabled: true,
+          show_recent_activity: true,
+          show_running_balance: true,
+        });
+        setBudgetValue('0');
+      }
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['deleted-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['custom-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast({ title: clearTarget === 'transactions' ? 'All transactions cleared! 🗑️' : clearTarget === 'categories' ? 'Custom categories cleared! 🗑️' : 'All data reset! 🗑️' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setClearing(false);
+      setClearTarget(null);
+    }
+  };
 
   useEffect(() => {
     if (profile) {
@@ -340,6 +388,63 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       {editingCategory && (
         <EditCategoryModal category={editingCategory} onClose={() => setEditingCategory(null)} />
       )}
+
+      {/* Clear Data Section */}
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center gap-2 mb-4">
+          <Trash2 size={18} className="text-destructive" />
+          <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">Clear Data</h3>
+        </div>
+        <div className="space-y-2">
+          <button
+            onClick={() => setClearTarget('transactions')}
+            className="w-full py-3 rounded-xl bg-secondary text-sm font-medium text-foreground flex items-center justify-center gap-2 active:scale-95 transition-all"
+          >
+            🗑️ Clear All Transactions
+          </button>
+          <button
+            onClick={() => setClearTarget('categories')}
+            className="w-full py-3 rounded-xl bg-secondary text-sm font-medium text-foreground flex items-center justify-center gap-2 active:scale-95 transition-all"
+          >
+            🏷️ Clear Custom Categories
+          </button>
+          <button
+            onClick={() => setClearTarget('all')}
+            className="w-full py-3 rounded-xl bg-destructive/10 text-sm font-bold text-destructive flex items-center justify-center gap-2 active:scale-95 transition-all"
+          >
+            ⚠️ Reset All Data
+          </button>
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-2 text-center">This action cannot be undone</p>
+      </div>
+
+      {/* Clear Confirmation Dialog */}
+      <AlertDialog open={!!clearTarget} onOpenChange={open => { if (!open) setClearTarget(null); }}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">
+              {clearTarget === 'transactions' ? 'Clear All Transactions?' : clearTarget === 'categories' ? 'Clear Custom Categories?' : 'Reset All Data?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {clearTarget === 'transactions'
+                ? 'This will permanently delete all your transactions. This cannot be undone.'
+                : clearTarget === 'categories'
+                ? 'This will remove all your custom categories. Default categories will remain.'
+                : 'This will delete all transactions, custom categories, and reset settings to defaults. This cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl" disabled={clearing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearData}
+              disabled={clearing}
+              className="rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {clearing ? 'Clearing...' : 'Yes, Clear'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
