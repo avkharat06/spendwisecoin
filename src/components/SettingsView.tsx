@@ -30,6 +30,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [budgetValue, setBudgetValue] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string; type?: string } | null>(null);
+  const [showAddCategory, setShowAddCategory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: customCategories = [] } = useCustomCategories();
   const queryClient = useQueryClient();
