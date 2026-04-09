@@ -31,6 +31,49 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string; type?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: customCategories = [] } = useCustomCategories();
+  const queryClient = useQueryClient();
+  const [clearTarget, setClearTarget] = useState<'transactions' | 'categories' | 'all' | null>(null);
+  const [clearing, setClearing] = useState(false);
+
+  const handleClearData = async () => {
+    if (!clearTarget || !user) return;
+    setClearing(true);
+    try {
+      if (clearTarget === 'transactions' || clearTarget === 'all') {
+        const { error } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
+      if (clearTarget === 'categories' || clearTarget === 'all') {
+        const { error } = await supabase
+          .from('custom_categories')
+          .delete()
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
+      if (clearTarget === 'all') {
+        await updateProfile.mutateAsync({
+          monthly_budget: 0,
+          budget_enabled: true,
+          show_recent_activity: true,
+          show_running_balance: true,
+        });
+        setBudgetValue('0');
+      }
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['deleted-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['custom-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast({ title: clearTarget === 'transactions' ? 'All transactions cleared! 🗑️' : clearTarget === 'categories' ? 'Custom categories cleared! 🗑️' : 'All data reset! 🗑️' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setClearing(false);
+      setClearTarget(null);
+    }
+  };
 
   useEffect(() => {
     if (profile) {
