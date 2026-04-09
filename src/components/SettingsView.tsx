@@ -33,7 +33,6 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; emoji: string; color: string; type?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: customCategories = [] } = useCustomCategories();
-  const [pendingCurrency, setPendingCurrency] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
