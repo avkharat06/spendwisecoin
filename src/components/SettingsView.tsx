@@ -388,6 +388,63 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
       {editingCategory && (
         <EditCategoryModal category={editingCategory} onClose={() => setEditingCategory(null)} />
       )}
+
+      {/* Clear Data Section */}
+      <div className="rounded-xl bg-card p-5 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center gap-2 mb-4">
+          <Trash2 size={18} className="text-destructive" />
+          <h3 className="text-sm font-display font-semibold text-foreground uppercase tracking-widest">Clear Data</h3>
+        </div>
+        <div className="space-y-2">
+          <button
+            onClick={() => setClearTarget('transactions')}
+            className="w-full py-3 rounded-xl bg-secondary text-sm font-medium text-foreground flex items-center justify-center gap-2 active:scale-95 transition-all"
+          >
+            🗑️ Clear All Transactions
+          </button>
+          <button
+            onClick={() => setClearTarget('categories')}
+            className="w-full py-3 rounded-xl bg-secondary text-sm font-medium text-foreground flex items-center justify-center gap-2 active:scale-95 transition-all"
+          >
+            🏷️ Clear Custom Categories
+          </button>
+          <button
+            onClick={() => setClearTarget('all')}
+            className="w-full py-3 rounded-xl bg-destructive/10 text-sm font-bold text-destructive flex items-center justify-center gap-2 active:scale-95 transition-all"
+          >
+            ⚠️ Reset All Data
+          </button>
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-2 text-center">This action cannot be undone</p>
+      </div>
+
+      {/* Clear Confirmation Dialog */}
+      <AlertDialog open={!!clearTarget} onOpenChange={open => { if (!open) setClearTarget(null); }}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">
+              {clearTarget === 'transactions' ? 'Clear All Transactions?' : clearTarget === 'categories' ? 'Clear Custom Categories?' : 'Reset All Data?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {clearTarget === 'transactions'
+                ? 'This will permanently delete all your transactions. This cannot be undone.'
+                : clearTarget === 'categories'
+                ? 'This will remove all your custom categories. Default categories will remain.'
+                : 'This will delete all transactions, custom categories, and reset settings to defaults. This cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl" disabled={clearing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearData}
+              disabled={clearing}
+              className="rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {clearing ? 'Clearing...' : 'Yes, Clear'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
