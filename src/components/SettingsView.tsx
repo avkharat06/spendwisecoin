@@ -1,18 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useProfile, useUpdateProfile, useCustomCategories, useTransactions } from '@/lib/store';
-import { ArrowLeft, User, DollarSign, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag } from 'lucide-react';
+import { useProfile, useUpdateProfile, useCustomCategories } from '@/lib/store';
+import { ArrowLeft, User, Eye, EyeOff, Wallet, Save, Camera, Pencil, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import EditCategoryModal from './EditCategoryModal';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-const EXCHANGE_RATE = 83.5;
 
 interface SettingsViewProps {
   onBack: () => void;
