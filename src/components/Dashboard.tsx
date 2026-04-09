@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState, lazy, Suspense } from 'react';
 import { useTransactions, useProfile } from '@/lib/store';
 import { AlertTriangle } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -399,4 +399,4 @@ const Dashboard = ({ onFilterView, onCategoryView, onPaymentMethodView }: Dashbo
   );
 };
 
-export default Dashboard;
+export default React.memo(Dashboard);
