@@ -40,6 +40,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterPayment, setFilterPayment] = useState<'all' | 'upi' | 'cash'>('all');
+  const [balanceTab, setBalanceTab] = useState<'total' | 'cash' | 'upi'>('total');
 
   // Debounce search
   useEffect(() => {
