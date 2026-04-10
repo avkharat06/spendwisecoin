@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartphone, Banknote, Search, SlidersHorizontal } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Search, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SmartAmount, abbreviateNumber } from '@/lib/format-amount';
 
