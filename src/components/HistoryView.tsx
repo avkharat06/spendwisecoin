@@ -200,6 +200,24 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const cashBalance = balanceStats.cashBalance;
   const upiBalance = balanceStats.upiBalance;
 
+  const activeBalance = balanceTab === 'cash' ? cashBalance : balanceTab === 'upi' ? upiBalance : balanceStats.totalBalance;
+  const activeIncome = useMemo(() => {
+    if (balanceTab === 'total') return balanceStats.totalIncome;
+    let inc = 0;
+    transactions.forEach(tx => {
+      if (tx.type === 'income' && ((tx as any).payment_method || 'cash') === balanceTab) inc += tx.amount;
+    });
+    return inc;
+  }, [transactions, balanceTab, balanceStats.totalIncome]);
+  const activeExpense = useMemo(() => {
+    if (balanceTab === 'total') return balanceStats.totalExpense;
+    let exp = 0;
+    transactions.forEach(tx => {
+      if (tx.type === 'expense' && ((tx as any).payment_method || 'cash') === balanceTab) exp += tx.amount;
+    });
+    return exp;
+  }, [transactions, balanceTab, balanceStats.totalExpense]);
+
   const grouped = useMemo(() => {
     const groups: Record<string, typeof transactions> = {};
     transactions.forEach(tx => {
