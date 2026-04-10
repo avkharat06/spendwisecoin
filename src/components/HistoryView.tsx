@@ -174,25 +174,30 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const totalExpense = pieData.reduce((s, d) => s + d.value, 0);
   const topCategory = pieData[0];
 
-  const cashBalance = useMemo(() => {
-    let income = 0, expense = 0;
+  const balanceStats = useMemo(() => {
+    let cashIncome = 0, cashExpense = 0, upiIncome = 0, upiExpense = 0;
+    let totalIncome = 0, totalExpense = 0;
     transactions.forEach(tx => {
-      if ((tx as any).payment_method === 'cash') {
-        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
+      const pm = (tx as any).payment_method || 'cash';
+      if (tx.type === 'income') {
+        totalIncome += tx.amount;
+        if (pm === 'cash') cashIncome += tx.amount; else upiIncome += tx.amount;
+      } else {
+        totalExpense += tx.amount;
+        if (pm === 'cash') cashExpense += tx.amount; else upiExpense += tx.amount;
       }
     });
-    return income - expense;
+    return {
+      cashBalance: cashIncome - cashExpense,
+      upiBalance: upiIncome - upiExpense,
+      totalIncome,
+      totalExpense,
+      totalBalance: totalIncome - totalExpense,
+    };
   }, [transactions]);
 
-  const upiBalance = useMemo(() => {
-    let income = 0, expense = 0;
-    transactions.forEach(tx => {
-      if ((tx as any).payment_method === 'upi') {
-        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
-      }
-    });
-    return income - expense;
-  }, [transactions]);
+  const cashBalance = balanceStats.cashBalance;
+  const upiBalance = balanceStats.upiBalance;
 
   const grouped = useMemo(() => {
     const groups: Record<string, typeof transactions> = {};

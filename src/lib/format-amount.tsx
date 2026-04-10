@@ -9,14 +9,14 @@ export function abbreviateNumber(n: number, currency: string = '₹'): { short: 
   const locale = currency === '₹' ? 'en-IN' : 'en-US';
   const full = currency + abs.toLocaleString(locale);
 
+  // Only abbreviate for 6+ digit numbers (≥100000)
   if (currency === '₹') {
     if (abs >= 10000000) return { short: `${currency}${(abs / 10000000).toFixed(1).replace(/\.0$/, '')}Cr`, full, isAbbreviated: true };
     if (abs >= 100000) return { short: `${currency}${(abs / 100000).toFixed(1).replace(/\.0$/, '')}L`, full, isAbbreviated: true };
-    if (abs >= 1000) return { short: `${currency}${(abs / 1000).toFixed(1).replace(/\.0$/, '')}K`, full, isAbbreviated: true };
   } else {
     if (abs >= 1000000000) return { short: `${currency}${(abs / 1000000000).toFixed(1).replace(/\.0$/, '')}B`, full, isAbbreviated: true };
     if (abs >= 1000000) return { short: `${currency}${(abs / 1000000).toFixed(1).replace(/\.0$/, '')}M`, full, isAbbreviated: true };
-    if (abs >= 1000) return { short: `${currency}${(abs / 1000).toFixed(1).replace(/\.0$/, '')}K`, full, isAbbreviated: true };
+    if (abs >= 100000) return { short: `${currency}${(abs / 100000).toFixed(0)}K`, full, isAbbreviated: true };
   }
 
   return { short: full, full, isAbbreviated: false };
