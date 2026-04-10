@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Smartphone, Banknote, Search, SlidersHorizontal } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Search, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SmartAmount, abbreviateNumber } from '@/lib/format-amount';
 
@@ -40,6 +40,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterPayment, setFilterPayment] = useState<'all' | 'upi' | 'cash'>('all');
+  const [balanceTab, setBalanceTab] = useState<'total' | 'cash' | 'upi'>('total');
 
   // Debounce search
   useEffect(() => {
@@ -174,25 +175,48 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const totalExpense = pieData.reduce((s, d) => s + d.value, 0);
   const topCategory = pieData[0];
 
-  const cashBalance = useMemo(() => {
-    let income = 0, expense = 0;
+  const balanceStats = useMemo(() => {
+    let cashIncome = 0, cashExpense = 0, upiIncome = 0, upiExpense = 0;
+    let totalIncome = 0, totalExpense = 0;
     transactions.forEach(tx => {
-      if ((tx as any).payment_method === 'cash') {
-        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
+      const pm = (tx as any).payment_method || 'cash';
+      if (tx.type === 'income') {
+        totalIncome += tx.amount;
+        if (pm === 'cash') cashIncome += tx.amount; else upiIncome += tx.amount;
+      } else {
+        totalExpense += tx.amount;
+        if (pm === 'cash') cashExpense += tx.amount; else upiExpense += tx.amount;
       }
     });
-    return income - expense;
+    return {
+      cashBalance: cashIncome - cashExpense,
+      upiBalance: upiIncome - upiExpense,
+      totalIncome,
+      totalExpense,
+      totalBalance: totalIncome - totalExpense,
+    };
   }, [transactions]);
 
-  const upiBalance = useMemo(() => {
-    let income = 0, expense = 0;
+  const cashBalance = balanceStats.cashBalance;
+  const upiBalance = balanceStats.upiBalance;
+
+  const activeBalance = balanceTab === 'cash' ? cashBalance : balanceTab === 'upi' ? upiBalance : balanceStats.totalBalance;
+  const activeIncome = useMemo(() => {
+    if (balanceTab === 'total') return balanceStats.totalIncome;
+    let inc = 0;
     transactions.forEach(tx => {
-      if ((tx as any).payment_method === 'upi') {
-        if (tx.type === 'income') income += tx.amount; else expense += tx.amount;
-      }
+      if (tx.type === 'income' && ((tx as any).payment_method || 'cash') === balanceTab) inc += tx.amount;
     });
-    return income - expense;
-  }, [transactions]);
+    return inc;
+  }, [transactions, balanceTab, balanceStats.totalIncome]);
+  const activeExpense = useMemo(() => {
+    if (balanceTab === 'total') return balanceStats.totalExpense;
+    let exp = 0;
+    transactions.forEach(tx => {
+      if (tx.type === 'expense' && ((tx as any).payment_method || 'cash') === balanceTab) exp += tx.amount;
+    });
+    return exp;
+  }, [transactions, balanceTab, balanceStats.totalExpense]);
 
   const grouped = useMemo(() => {
     const groups: Record<string, typeof transactions> = {};
@@ -415,27 +439,40 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         </SheetContent>
       </Sheet>
 
-      {/* Cash & UPI Balance Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="card-item flex items-center gap-3 p-3">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Banknote size={18} className="text-primary" />
-          </div>
-          <div>
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Cash</p>
-            <p className={`text-sm font-display font-bold ${cashBalance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
-              <SmartAmount amount={Math.abs(cashBalance)} currency={currency} sign={cashBalance < 0 ? '-' : ''} />
-            </p>
+      {/* Balance Card with Tabs */}
+      <div className="rounded-2xl bg-card p-4 border border-border mb-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Balance</p>
+          <div className="flex gap-1 bg-secondary rounded-lg p-0.5">
+            {(['total', 'cash', 'upi'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setBalanceTab(tab)}
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all ${
+                  balanceTab === tab
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {tab === 'total' ? 'Total' : tab === 'cash' ? '💵 Cash' : '💳 UPI'}
+              </button>
+            ))}
           </div>
         </div>
-        <div className="card-item flex items-center gap-3 p-3">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Smartphone size={18} className="text-primary" />
+        <p className={`text-2xl font-display font-bold ${activeBalance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
+          <SmartAmount amount={Math.abs(activeBalance)} currency={currency} sign={activeBalance < 0 ? '-' : ''} />
+        </p>
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <div className="rounded-xl bg-secondary/60 px-3 py-2">
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Income</p>
+            <p className="text-sm font-display font-bold text-green-400">
+              <SmartAmount amount={activeIncome} currency={currency} sign="+" />
+            </p>
           </div>
-          <div>
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">UPI</p>
-            <p className={`text-sm font-display font-bold ${upiBalance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
-              <SmartAmount amount={Math.abs(upiBalance)} currency={currency} sign={upiBalance < 0 ? '-' : ''} />
+          <div className="rounded-xl bg-secondary/60 px-3 py-2">
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Spent</p>
+            <p className="text-sm font-display font-bold text-destructive">
+              <SmartAmount amount={activeExpense} currency={currency} sign="-" />
             </p>
           </div>
         </div>
