@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Search, SlidersHorizontal } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Search, SlidersHorizontal, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SmartAmount, abbreviateNumber } from '@/lib/format-amount';
+import { format, parseISO } from 'date-fns';
 
 import EditTransactionModal from './EditTransactionModal';
 import TransactionDetailModal from './TransactionDetailModal';
@@ -13,6 +14,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet';
+import { Calendar as CalendarUI } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface HistoryViewProps {
   filter?: 'expense' | 'income' | 'all';
@@ -40,6 +43,8 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterPayment, setFilterPayment] = useState<'all' | 'upi' | 'cash'>('all');
+  const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
+  const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
   const [balanceTab, setBalanceTab] = useState<'total' | 'cash' | 'upi'>('total');
 
   // Debounce search
@@ -55,12 +60,14 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
     return Array.from(cats).sort();
   }, [allTransactions]);
 
-  const hasActiveFilters = filterType !== 'all' || filterCategory !== null || filterPayment !== 'all';
+  const hasActiveFilters = filterType !== 'all' || filterCategory !== null || filterPayment !== 'all' || !!filterDateFrom || !!filterDateTo;
 
   const clearAllFilters = () => {
     setFilterType('all');
     setFilterCategory(null);
     setFilterPayment('all');
+    setFilterDateFrom(undefined);
+    setFilterDateTo(undefined);
   };
 
   const transactions = useMemo(() => {
@@ -85,8 +92,18 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
     if (filterCategory) filtered = filtered.filter(tx => tx.category === filterCategory);
     if (filterPayment !== 'all') filtered = filtered.filter(tx => (tx as any).payment_method === filterPayment);
 
+    // Date range filter
+    if (filterDateFrom) {
+      filtered = filtered.filter(tx => parseISO(tx.date) >= filterDateFrom);
+    }
+    if (filterDateTo) {
+      const end = new Date(filterDateTo);
+      end.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(tx => parseISO(tx.date) <= end);
+    }
+
     return filtered;
-  }, [allTransactions, filter, categoryFilter, selectedMonth, paymentFilter, debouncedSearch, filterType, filterCategory, filterPayment]);
+  }, [allTransactions, filter, categoryFilter, selectedMonth, paymentFilter, debouncedSearch, filterType, filterCategory, filterPayment, filterDateFrom, filterDateTo]);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
@@ -335,6 +352,16 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         {/* Active filter chips */}
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            {(filterDateFrom || filterDateTo) && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                {filterDateFrom && filterDateTo
+                  ? `${format(filterDateFrom, 'dd MMM')} – ${format(filterDateTo, 'dd MMM')}`
+                  : filterDateFrom
+                    ? `From ${format(filterDateFrom, 'dd MMM')}`
+                    : `To ${format(filterDateTo!, 'dd MMM')}`}
+                <button onClick={() => { setFilterDateFrom(undefined); setFilterDateTo(undefined); }}><X size={12} /></button>
+              </span>
+            )}
             {filterType !== 'all' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {filterType === 'income' ? 'Income' : 'Expense'}
@@ -372,7 +399,36 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
           <SheetHeader>
             <SheetTitle className="text-lg font-display font-bold">Filters</SheetTitle>
           </SheetHeader>
-          <div className="space-y-5 py-4">
+          <div className="space-y-5 py-4 max-h-[60vh] overflow-y-auto">
+            {/* Date Range */}
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Date Range</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground">
+                      <Calendar size={14} className="text-muted-foreground" />
+                      {filterDateFrom ? format(filterDateFrom, 'dd MMM yyyy') : 'From'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarUI mode="single" selected={filterDateFrom} onSelect={d => setFilterDateFrom(d || undefined)} className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground">
+                      <Calendar size={14} className="text-muted-foreground" />
+                      {filterDateTo ? format(filterDateTo, 'dd MMM yyyy') : 'To'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarUI mode="single" selected={filterDateTo} onSelect={d => setFilterDateTo(d || undefined)} className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
             {/* Type filter */}
             <div>
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Type</p>
