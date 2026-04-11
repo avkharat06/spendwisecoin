@@ -197,6 +197,15 @@ const Index = () => {
         {view === 'settings' && <SettingsView onBack={() => setView('home')} />}
       </main>
 
+      {/* Floating Action Button */}
+      <button
+        onClick={() => setShowAdd(true)}
+        className="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg active:scale-110 transition-transform"
+        style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
+      >
+        <Plus size={24} />
+      </button>
+
       {showAdd && <AddTransactionModal onClose={() => setShowAdd(false)} />}
 
       {/* Logout Confirm */}
