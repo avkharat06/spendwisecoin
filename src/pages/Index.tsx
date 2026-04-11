@@ -179,18 +179,9 @@ const Index = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowFeedback(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <MessageSquare size={18} />
-            </button>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-              style={{ boxShadow: 'var(--shadow-glow)' }}
-            >
-              <Plus size={20} />
-            </button>
-          </div>
+          <button onClick={() => setShowFeedback(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <MessageSquare size={18} />
+          </button>
         </div>
       </header>
 
