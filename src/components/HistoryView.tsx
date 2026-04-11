@@ -399,7 +399,36 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
           <SheetHeader>
             <SheetTitle className="text-lg font-display font-bold">Filters</SheetTitle>
           </SheetHeader>
-          <div className="space-y-5 py-4">
+          <div className="space-y-5 py-4 max-h-[60vh] overflow-y-auto">
+            {/* Date Range */}
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Date Range</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground">
+                      <Calendar size={14} className="text-muted-foreground" />
+                      {filterDateFrom ? format(filterDateFrom, 'dd MMM yyyy') : 'From'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarUI mode="single" selected={filterDateFrom} onSelect={d => setFilterDateFrom(d || undefined)} className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground">
+                      <Calendar size={14} className="text-muted-foreground" />
+                      {filterDateTo ? format(filterDateTo, 'dd MMM yyyy') : 'To'}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarUI mode="single" selected={filterDateTo} onSelect={d => setFilterDateTo(d || undefined)} className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
             {/* Type filter */}
             <div>
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Type</p>
