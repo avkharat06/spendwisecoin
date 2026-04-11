@@ -352,6 +352,16 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
         {/* Active filter chips */}
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            {(filterDateFrom || filterDateTo) && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                {filterDateFrom && filterDateTo
+                  ? `${format(filterDateFrom, 'dd MMM')} – ${format(filterDateTo, 'dd MMM')}`
+                  : filterDateFrom
+                    ? `From ${format(filterDateFrom, 'dd MMM')}`
+                    : `To ${format(filterDateTo!, 'dd MMM')}`}
+                <button onClick={() => { setFilterDateFrom(undefined); setFilterDateTo(undefined); }}><X size={12} /></button>
+              </span>
+            )}
             {filterType !== 'all' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {filterType === 'income' ? 'Income' : 'Expense'}
