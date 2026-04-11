@@ -179,18 +179,9 @@ const Index = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowFeedback(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <MessageSquare size={18} />
-            </button>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-              style={{ boxShadow: 'var(--shadow-glow)' }}
-            >
-              <Plus size={20} />
-            </button>
-          </div>
+          <button onClick={() => setShowFeedback(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <MessageSquare size={18} />
+          </button>
         </div>
       </header>
 
@@ -205,6 +196,15 @@ const Index = () => {
         {view === 'download-statement' && <DownloadStatementView onBack={() => setView('home')} />}
         {view === 'settings' && <SettingsView onBack={() => setView('home')} />}
       </main>
+
+      {/* Floating Action Button */}
+      <button
+        onClick={() => setShowAdd(true)}
+        className="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg active:scale-110 transition-transform"
+        style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
+      >
+        <Plus size={24} />
+      </button>
 
       {showAdd && <AddTransactionModal onClose={() => setShowAdd(false)} />}
 
