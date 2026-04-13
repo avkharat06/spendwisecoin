@@ -46,6 +46,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          app_lock_enabled: boolean
+          app_lock_password: string | null
+          app_lock_pin: string | null
+          app_lock_type: string
           avatar_url: string | null
           budget_enabled: boolean
           created_at: string
@@ -60,6 +64,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app_lock_enabled?: boolean
+          app_lock_password?: string | null
+          app_lock_pin?: string | null
+          app_lock_type?: string
           avatar_url?: string | null
           budget_enabled?: boolean
           created_at?: string
@@ -74,6 +82,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          app_lock_enabled?: boolean
+          app_lock_password?: string | null
+          app_lock_pin?: string | null
+          app_lock_type?: string
           avatar_url?: string | null
           budget_enabled?: boolean
           created_at?: string
