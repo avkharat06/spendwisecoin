@@ -9,6 +9,7 @@ import DownloadStatementView from '@/components/DownloadStatementView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
 import SettingsView from '@/components/SettingsView';
 import HelpView from '@/components/HelpView';
+import AppLockScreen from '@/components/AppLockScreen';
 import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send, Download, HelpCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -36,6 +37,7 @@ const Index = () => {
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<'upi' | 'cash' | undefined>(undefined);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
+  const [appUnlocked, setAppUnlocked] = useState(false);
   const { toast } = useToast();
 
   // Handle mobile back button — navigate back to home instead of exiting
