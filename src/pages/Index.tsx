@@ -132,6 +132,19 @@ const Index = () => {
     };
   }, [allowReload]);
 
+  // Show lock screen if app lock is enabled and not yet unlocked
+  const profileData = profile as any;
+  if (profileData?.app_lock_enabled && !appUnlocked) {
+    return (
+      <AppLockScreen
+        lockType={profileData.app_lock_type || 'pin'}
+        storedPin={profileData.app_lock_pin}
+        storedPassword={profileData.app_lock_password}
+        onUnlock={() => setAppUnlocked(true)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
