@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile, useUpdateProfile } from '@/lib/store';
-import { ArrowLeft, User, Eye, EyeOff, Save, Camera } from 'lucide-react';
+import { ArrowLeft, User, Save, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,8 +17,6 @@ const ProfileSection = ({ onBack }: ProfileSectionProps) => {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,19 +31,12 @@ const ProfileSection = ({ onBack }: ProfileSectionProps) => {
     if (displayName.trim() && displayName !== profile?.display_name) {
       updates.display_name = displayName.trim();
     }
-    if (Object.keys(updates).length === 0 && !newPassword) {
+    if (Object.keys(updates).length === 0) {
       toast({ title: 'No changes to save' });
       return;
     }
     try {
-      if (Object.keys(updates).length > 0) {
-        await updateProfile.mutateAsync(updates);
-      }
-      if (newPassword) {
-        const { error } = await supabase.auth.updateUser({ password: newPassword });
-        if (error) throw error;
-        setNewPassword('');
-      }
+      await updateProfile.mutateAsync(updates);
       toast({ title: 'Profile updated!' });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -132,15 +123,6 @@ const ProfileSection = ({ onBack }: ProfileSectionProps) => {
           <div>
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">Email</label>
             <input type="email" value={user?.email || ''} disabled className="w-full px-4 py-3 rounded-xl bg-secondary text-sm text-muted-foreground border border-border outline-none opacity-60" />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-1 block">New Password</label>
-            <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Leave blank to keep current" className="w-full px-4 py-3 rounded-xl bg-secondary text-sm text-foreground border border-border focus:border-primary outline-none transition-all pr-12" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
           </div>
           <button onClick={handleSaveProfile} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all">
             <Save size={16} />
