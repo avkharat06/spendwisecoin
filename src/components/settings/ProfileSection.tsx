@@ -124,15 +124,6 @@ const ProfileSection = ({ onBack }: ProfileSectionProps) => {
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">Email</label>
             <input type="email" value={user?.email || ''} disabled className="w-full px-4 py-3 rounded-xl bg-secondary text-sm text-muted-foreground border border-border outline-none opacity-60" />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-1 block">New Password</label>
-            <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Leave blank to keep current" className="w-full px-4 py-3 rounded-xl bg-secondary text-sm text-foreground border border-border focus:border-primary outline-none transition-all pr-12" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
           <button onClick={handleSaveProfile} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all">
             <Save size={16} />
             Save Profile
