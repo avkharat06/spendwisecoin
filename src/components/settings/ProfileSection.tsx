@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile, useUpdateProfile } from '@/lib/store';
-import { ArrowLeft, User, Eye, EyeOff, Save, Camera } from 'lucide-react';
+import { ArrowLeft, User, Save, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,8 +17,6 @@ const ProfileSection = ({ onBack }: ProfileSectionProps) => {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,19 +31,12 @@ const ProfileSection = ({ onBack }: ProfileSectionProps) => {
     if (displayName.trim() && displayName !== profile?.display_name) {
       updates.display_name = displayName.trim();
     }
-    if (Object.keys(updates).length === 0 && !newPassword) {
+    if (Object.keys(updates).length === 0) {
       toast({ title: 'No changes to save' });
       return;
     }
     try {
-      if (Object.keys(updates).length > 0) {
-        await updateProfile.mutateAsync(updates);
-      }
-      if (newPassword) {
-        const { error } = await supabase.auth.updateUser({ password: newPassword });
-        if (error) throw error;
-        setNewPassword('');
-      }
+      await updateProfile.mutateAsync(updates);
       toast({ title: 'Profile updated!' });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
