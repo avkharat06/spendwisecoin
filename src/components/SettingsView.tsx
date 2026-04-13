@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { ArrowLeft, User, Settings, Tag, Trash2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, User, Settings, Tag, Trash2, Shield, ChevronRight } from 'lucide-react';
 import ProfileSection from './settings/ProfileSection';
 import PreferencesSection from './settings/PreferencesSection';
 import CategoriesSection from './settings/CategoriesSection';
 import ClearDataSection from './settings/ClearDataSection';
+import SecurityPrivacySection from './settings/SecurityPrivacySection';
 
 interface SettingsViewProps {
   onBack: () => void;
 }
 
-type SettingsScreen = 'home' | 'profile' | 'preferences' | 'categories' | 'clear-data';
+type SettingsScreen = 'home' | 'profile' | 'preferences' | 'categories' | 'security' | 'clear-data';
 
 const menuItems: { key: SettingsScreen; icon: React.ReactNode; label: string }[] = [
   { key: 'profile', icon: <User size={20} className="text-primary" />, label: 'Profile' },
   { key: 'preferences', icon: <Settings size={20} className="text-primary" />, label: 'Preferences' },
   { key: 'categories', icon: <Tag size={20} className="text-primary" />, label: 'My Categories' },
+  { key: 'security', icon: <Shield size={20} className="text-primary" />, label: 'Security & Privacy' },
   { key: 'clear-data', icon: <Trash2 size={20} className="text-destructive" />, label: 'Clear Data' },
 ];
 
@@ -24,6 +26,7 @@ const SettingsView = ({ onBack }: SettingsViewProps) => {
   if (screen === 'profile') return <ProfileSection onBack={() => setScreen('home')} />;
   if (screen === 'preferences') return <PreferencesSection onBack={() => setScreen('home')} />;
   if (screen === 'categories') return <CategoriesSection onBack={() => setScreen('home')} />;
+  if (screen === 'security') return <SecurityPrivacySection onBack={() => setScreen('home')} />;
   if (screen === 'clear-data') return <ClearDataSection onBack={() => setScreen('home')} />;
 
   return (
