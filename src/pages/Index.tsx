@@ -8,7 +8,8 @@ import InsightsView from '@/components/InsightsView';
 import DownloadStatementView from '@/components/DownloadStatementView';
 import DeletedHistoryView from '@/components/DeletedHistoryView';
 import SettingsView from '@/components/SettingsView';
-import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send, Download } from 'lucide-react';
+import HelpView from '@/components/HelpView';
+import { Plus, Clock, Lightbulb, LogOut, Home, Trash2, Settings, MessageSquare, X, Send, Download, HelpCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -21,7 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings' | 'download-statement';
+type ViewType = 'home' | 'history' | 'insights' | 'filtered' | 'deleted' | 'category' | 'settings' | 'download-statement' | 'help';
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -171,6 +172,10 @@ const Index = () => {
                 <Trash2 size={16} className="mr-2.5 text-muted-foreground" />
                 <span className="text-sm font-medium">Deleted History</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigateTo('help')} className="rounded-lg py-2.5 px-3 cursor-pointer">
+                <HelpCircle size={16} className="mr-2.5 text-muted-foreground" />
+                <span className="text-sm font-medium">Help</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border/50" />
               <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="rounded-lg py-2.5 px-3 cursor-pointer text-destructive focus:text-destructive">
                 <LogOut size={16} className="mr-2.5" />
@@ -195,6 +200,7 @@ const Index = () => {
         {view === 'deleted' && <DeletedHistoryView onBack={() => setView('home')} />}
         {view === 'download-statement' && <DownloadStatementView onBack={() => setView('home')} />}
         {view === 'settings' && <SettingsView onBack={() => setView('home')} />}
+        {view === 'help' && <HelpView onBack={() => setView('home')} />}
       </main>
 
       {/* Floating Action Button */}
