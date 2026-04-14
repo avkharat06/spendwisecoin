@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns';
 
 import EditTransactionModal from './EditTransactionModal';
 import TransactionDetailModal from './TransactionDetailModal';
+import AnalysisMode from './AnalysisMode';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
