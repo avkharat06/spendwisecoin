@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useTransactions, useSoftDeleteTransactions, useRestoreTransactions, useProfile } from '@/lib/store';
-import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Search, SlidersHorizontal, Calendar } from 'lucide-react';
+import { Trash2, ArrowLeft, CheckSquare, Square, ChevronDown, X, Pencil, Search, SlidersHorizontal, Calendar, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SmartAmount, abbreviateNumber } from '@/lib/format-amount';
 import { format, parseISO } from 'date-fns';
 
 import EditTransactionModal from './EditTransactionModal';
 import TransactionDetailModal from './TransactionDetailModal';
+import AnalysisMode from './AnalysisMode';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -46,6 +47,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
   const [balanceTab, setBalanceTab] = useState<'total' | 'cash' | 'upi'>('total');
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -267,6 +269,10 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
 
   const title = categoryFilter ? categoryFilter : filter === 'expense' ? 'Expenses' : filter === 'income' ? 'Income' : 'History';
 
+  if (showAnalysis) {
+    return <AnalysisMode onBack={() => setShowAnalysis(false)} />;
+  }
+
   return (
     <div className="animate-in pb-4">
       <div className="flex items-center gap-3 mb-4">
@@ -276,6 +282,10 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
           </button>
         )}
         <h2 className="text-2xl font-display font-bold text-foreground flex-1">{title}</h2>
+
+        <button onClick={() => setShowAnalysis(true)} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all" title="Analysis Mode">
+          <BarChart3 size={18} className="text-muted-foreground" />
+        </button>
 
         {selectionMode && (
           <button onClick={allSelected ? deselectAll : selectAll} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
