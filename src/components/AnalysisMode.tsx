@@ -50,7 +50,7 @@ const AnalysisMode: React.FC<AnalysisModeProps> = ({ onBack }) => {
 
   // Filtered transactions
   const filtered = useMemo(() => {
-    let txs = allTransactions.filter(t => !t.is_deleted);
+    let txs = [...allTransactions];
 
     if (dateFrom) txs = txs.filter(t => parseISO(t.date) >= dateFrom);
     if (dateTo) {
@@ -114,7 +114,7 @@ const AnalysisMode: React.FC<AnalysisModeProps> = ({ onBack }) => {
     const lastMonth = allTransactions.filter(t => {
       const d = parseISO(t.date);
       const lm = subMonths(now, 1);
-      return d >= startOfMonth(lm) && d <= endOfMonth(lm) && t.type === 'expense' && !t.is_deleted;
+      return d >= startOfMonth(lm) && d <= endOfMonth(lm) && t.type === 'expense';
     });
 
     const thisTotal = thisMonth.reduce((s, t) => s + Number(t.amount), 0);
@@ -213,7 +213,7 @@ const AnalysisMode: React.FC<AnalysisModeProps> = ({ onBack }) => {
     );
   }
 
-  if (allTransactions.filter(t => !t.is_deleted).length === 0) {
+  if (allTransactions.length === 0) {
     return (
       <div className="animate-in pb-4">
         <div className="flex items-center gap-3 mb-4">
