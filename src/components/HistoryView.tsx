@@ -47,6 +47,7 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
   const [balanceTab, setBalanceTab] = useState<'total' | 'cash' | 'upi'>('total');
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   // Debounce search
   useEffect(() => {
