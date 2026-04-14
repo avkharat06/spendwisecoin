@@ -269,6 +269,10 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
 
   const title = categoryFilter ? categoryFilter : filter === 'expense' ? 'Expenses' : filter === 'income' ? 'Income' : 'History';
 
+  if (showAnalysis) {
+    return <AnalysisMode onBack={() => setShowAnalysis(false)} />;
+  }
+
   return (
     <div className="animate-in pb-4">
       <div className="flex items-center gap-3 mb-4">
@@ -278,6 +282,10 @@ const HistoryView = ({ filter, categoryFilter, initialPaymentFilter, onBack }: H
           </button>
         )}
         <h2 className="text-2xl font-display font-bold text-foreground flex-1">{title}</h2>
+
+        <button onClick={() => setShowAnalysis(true)} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all" title="Analysis Mode">
+          <BarChart3 size={18} className="text-muted-foreground" />
+        </button>
 
         {selectionMode && (
           <button onClick={allSelected ? deselectAll : selectAll} className="p-2 rounded-xl bg-secondary active:scale-95 transition-all">
